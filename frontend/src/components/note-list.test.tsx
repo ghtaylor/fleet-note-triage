@@ -64,7 +64,7 @@ describe("NoteList", () => {
     expect(
       within(note).getByRole("heading", { level: 3, name: "Worn brake pads" }),
     ).toBeInTheDocument();
-    expect(within(note).getByText("Brake pads worn on car 12.")).toBeInTheDocument();
+    expect(note).toHaveTextContent("Brake pads worn on car 12.");
     expect(within(note).getByText("high")).toBeInTheDocument();
     expect(within(note).getByText("mechanical")).toBeInTheDocument();
   });

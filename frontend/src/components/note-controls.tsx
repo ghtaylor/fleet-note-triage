@@ -7,10 +7,16 @@ import { type ReactNode, useTransition } from "react";
 
 import type { NoteQuery } from "@/data/note-query";
 
-type QueryParameter = "category" | "priority" | "status" | "sort_by" | "direction";
+type QueryParameter = "category" | "priority" | "sort_by" | "direction";
+
+const statusTabs = [
+  { label: "Open", value: "open" },
+  { label: "Resolved", value: "resolved" },
+  { label: "All", value: undefined },
+] as const;
 
 const selectClassName =
-  "mt-1 w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900 disabled:bg-gray-100";
+  "min-h-9 w-full rounded-lg border border-gray-200 bg-white px-2.5 text-xs text-gray-700 outline-none focus:border-orange-500 focus:ring-3 focus:ring-orange-500/15 disabled:bg-gray-100";
 
 type SelectFieldProps = {
   label: string;
@@ -30,8 +36,8 @@ function SelectField({
   children,
 }: SelectFieldProps) {
   return (
-    <label className="text-sm font-medium">
-      {label}
+    <label>
+      <span className="sr-only">{label}</span>
       <select
         name={name}
         defaultValue={value}
@@ -63,6 +69,37 @@ function isDefaultValue(name: QueryParameter, value: string) {
   return (name === "sort_by" && value === "priority") || (name === "direction" && value === "desc");
 }
 
+function queryHref(query: NoteQuery) {
+  const queryString = createSearchParams(query).toString();
+  return queryString ? `/?${queryString}` : "/";
+}
+
+export function NoteStatusTabs({ query }: { query: NoteQuery }) {
+  return (
+    <nav aria-label="Status filters" className="flex gap-1 rounded-lg bg-gray-100 p-1">
+      {statusTabs.map((tab) => {
+        const isActive = query.status === tab.value;
+        return (
+          <Link
+            key={tab.label}
+            href={queryHref({ ...query, status: tab.value })}
+            scroll={false}
+            aria-current={isActive ? "page" : undefined}
+            className={clsx(
+              "rounded-md px-3 py-2 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500",
+              isActive
+                ? "bg-white text-gray-950 shadow-sm"
+                : "text-gray-500 hover:text-gray-900",
+            )}
+          >
+            {tab.label}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
 export function NoteControls({ query }: { query: NoteQuery }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -82,24 +119,8 @@ export function NoteControls({ query }: { query: NoteQuery }) {
   }
 
   return (
-    <section
-      aria-labelledby="note-controls-heading"
-      aria-busy={isPending}
-      className="rounded border border-gray-200 p-4"
-    >
-      <div className="flex items-center justify-between gap-3">
-        <h2 id="note-controls-heading" className="font-medium">
-          Filter and sort
-        </h2>
-        <Link
-          href="/"
-          scroll={false}
-          className="rounded px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
-        >
-          Clear
-        </Link>
-      </div>
-      <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+    <section aria-label="Filter and sort notes" aria-busy={isPending}>
+      <div className="grid gap-2 border-y border-gray-200 bg-gray-50 px-4 py-3 sm:grid-cols-2 sm:px-5 xl:grid-cols-4">
         <SelectField
           key={`category:${query.category ?? "all"}`}
           label="Category"
@@ -108,7 +129,7 @@ export function NoteControls({ query }: { query: NoteQuery }) {
           disabled={isPending}
           onValueChange={updateQuery}
         >
-          <option value="">All categories</option>
+          <option value="">Category: All</option>
           <option value="mechanical">Mechanical</option>
           <option value="electrical">Electrical</option>
           <option value="software">Software</option>
@@ -123,23 +144,11 @@ export function NoteControls({ query }: { query: NoteQuery }) {
           disabled={isPending}
           onValueChange={updateQuery}
         >
-          <option value="">All priorities</option>
+          <option value="">Priority: All</option>
           <option value="critical">Critical</option>
           <option value="high">High</option>
           <option value="medium">Medium</option>
           <option value="low">Low</option>
-        </SelectField>
-        <SelectField
-          key={`status:${query.status ?? "all"}`}
-          label="Status"
-          name="status"
-          value={query.status ?? ""}
-          disabled={isPending}
-          onValueChange={updateQuery}
-        >
-          <option value="">All statuses</option>
-          <option value="open">Open</option>
-          <option value="resolved">Resolved</option>
         </SelectField>
         <SelectField
           key={`sort:${query.sortBy}`}
@@ -149,8 +158,8 @@ export function NoteControls({ query }: { query: NoteQuery }) {
           disabled={isPending}
           onValueChange={updateQuery}
         >
-          <option value="priority">Priority</option>
-          <option value="created_at">Created</option>
+          <option value="priority">Sort: Priority</option>
+          <option value="created_at">Sort: Created</option>
         </SelectField>
         <SelectField
           key={`direction:${query.direction ?? "desc"}`}
@@ -160,20 +169,29 @@ export function NoteControls({ query }: { query: NoteQuery }) {
           disabled={isPending}
           onValueChange={updateQuery}
         >
-          <option value="desc">Descending</option>
-          <option value="asc">Ascending</option>
+          <option value="desc">Direction: Descending</option>
+          <option value="asc">Direction: Ascending</option>
         </SelectField>
       </div>
-      <p
-        role="status"
-        aria-live="polite"
-        className={clsx(
-          "mt-2 min-h-5 text-sm text-gray-500 transition-opacity duration-150",
-          isPending ? "opacity-100 delay-200" : "opacity-0 delay-0",
-        )}
-      >
-        {isPending ? "Updating notes…" : ""}
-      </p>
+      <div className="flex min-h-7 items-center justify-between px-4 sm:px-5">
+        <p
+          role="status"
+          aria-live="polite"
+          className={clsx(
+            "text-xs text-gray-500 transition-opacity duration-150",
+            isPending ? "opacity-100 delay-200" : "opacity-0 delay-0",
+          )}
+        >
+          {isPending ? "Updating notes…" : ""}
+        </p>
+        <Link
+          href="/"
+          scroll={false}
+          className="rounded px-2 py-1 text-xs font-medium text-gray-500 hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-orange-500"
+        >
+          Clear filters
+        </Link>
+      </div>
     </section>
   );
 }

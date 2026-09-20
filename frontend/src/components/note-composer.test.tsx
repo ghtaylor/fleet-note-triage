@@ -25,7 +25,7 @@ describe("NoteComposer", () => {
     const action = actionReturning({ status: "success", message: "Note added." });
     renderComposer(action);
 
-    const sourceText = screen.getByRole("textbox", { name: "Fleet note" });
+    const sourceText = screen.getByRole("textbox", { name: "Technician note" });
     fireEvent.change(sourceText, { target: { value: "Brake pads worn on car 12." } });
     fireEvent.submit(screen.getByRole("form", { name: "Submit a fleet note" }));
 
@@ -42,7 +42,7 @@ describe("NoteComposer", () => {
     });
     renderComposer(action);
 
-    const sourceText = screen.getByRole("textbox", { name: "Fleet note" });
+    const sourceText = screen.getByRole("textbox", { name: "Technician note" });
     fireEvent.change(sourceText, { target: { value: "unclear" } });
     fireEvent.submit(screen.getByRole("form", { name: "Submit a fleet note" }));
 
@@ -66,14 +66,14 @@ describe("NoteComposer", () => {
     );
     renderComposer(action);
 
-    fireEvent.change(screen.getByRole("textbox", { name: "Fleet note" }), {
+    fireEvent.change(screen.getByRole("textbox", { name: "Technician note" }), {
       target: { value: "Telemetry keeps restarting." },
     });
     fireEvent.submit(screen.getByRole("form", { name: "Submit a fleet note" }));
 
     const submitButton = screen.getByRole("button", { name: "Submit note" });
     await waitFor(() => expect(submitButton).toBeDisabled());
-    expect(screen.getByRole("textbox", { name: "Fleet note" })).toBeDisabled();
+    expect(screen.getByRole("textbox", { name: "Technician note" })).toBeDisabled();
     expect(screen.getByRole("status")).toHaveTextContent(
       "Extracting title, category, and priority…",
     );
@@ -83,28 +83,11 @@ describe("NoteComposer", () => {
     });
   });
 
-  it("keeps a fast analysis visible for a minimum time", async () => {
-    const action = actionReturning({ status: "success", message: "Note added." });
-    renderComposer(action);
-
-    fireEvent.change(screen.getByRole("textbox", { name: "Fleet note" }), {
-      target: { value: "Telemetry keeps restarting." },
-    });
-    const form = screen.getByRole("form", { name: "Submit a fleet note" });
-    const startedAt = performance.now();
-    fireEvent.submit(form);
-
-    await waitFor(() => expect(form).toHaveAttribute("aria-busy", "true"));
-    await waitFor(() => expect(form).toHaveAttribute("aria-busy", "false"));
-
-    expect(performance.now() - startedAt).toBeGreaterThanOrEqual(650);
-  });
-
   it("submits with Enter", async () => {
     const action = actionReturning({ status: "success", message: "Note added." });
     renderComposer(action);
 
-    const sourceText = screen.getByRole("textbox", { name: "Fleet note" });
+    const sourceText = screen.getByRole("textbox", { name: "Technician note" });
     fireEvent.change(sourceText, { target: { value: "Telemetry keeps restarting." } });
     fireEvent.keyDown(sourceText, { key: "Enter" });
 

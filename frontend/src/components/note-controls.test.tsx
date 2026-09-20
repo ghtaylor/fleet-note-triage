@@ -1,7 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { NoteControls } from "@/components/note-controls";
+import { NoteControls, NoteStatusTabs } from "@/components/note-controls";
+import type { NoteQuery } from "@/data/note-query";
 
 const { replaceRoute } = vi.hoisted(() => ({ replaceRoute: vi.fn() }));
 
@@ -15,24 +16,40 @@ describe("NoteControls", () => {
   });
 
   it("shows the active filters and sorting", () => {
+    const query: NoteQuery = {
+      category: "mechanical",
+      priority: "high",
+      status: "open",
+      sortBy: "created_at",
+      direction: "asc",
+    };
+
     render(
-      <NoteControls
-        query={{
-          category: "mechanical",
-          priority: "high",
-          status: "open",
-          sortBy: "created_at",
-          direction: "asc",
-        }}
-      />,
+      <>
+        <NoteStatusTabs query={query} />
+        <NoteControls query={query} />
+      </>,
     );
 
     expect(screen.getByRole("combobox", { name: "Category" })).toHaveValue("mechanical");
     expect(screen.getByRole("combobox", { name: "Priority" })).toHaveValue("high");
-    expect(screen.getByRole("combobox", { name: "Status" })).toHaveValue("open");
+    expect(screen.getByRole("link", { name: "Open" })).toHaveAttribute("aria-current", "page");
     expect(screen.getByRole("combobox", { name: "Sort by" })).toHaveValue("created_at");
     expect(screen.getByRole("combobox", { name: "Direction" })).toHaveValue("asc");
-    expect(screen.getByRole("link", { name: "Clear" })).toHaveAttribute("href", "/");
+    expect(screen.getByRole("link", { name: "Clear filters" })).toHaveAttribute("href", "/");
+  });
+
+  it("links status tabs while preserving the active query", () => {
+    render(
+      <NoteStatusTabs
+        query={{ category: "mechanical", sortBy: "priority", direction: "desc" }}
+      />,
+    );
+
+    expect(screen.getByRole("link", { name: "Resolved" })).toHaveAttribute(
+      "href",
+      "/?category=mechanical&status=resolved",
+    );
   });
 
   it("updates the URL immediately and omits default query parameters", () => {

@@ -1,7 +1,7 @@
 import type { NoteListResponse } from "@/api/types.gen";
 import { changeNoteStatus, submitNote } from "@/app/actions";
 import { NoteComposer } from "@/components/note-composer";
-import { NoteControls } from "@/components/note-controls";
+import { NoteControls, NoteStatusTabs } from "@/components/note-controls";
 import { NoteList } from "@/components/note-list";
 import { parseNoteQuery, type NoteQuery } from "@/data/note-query";
 import { fetchNotes } from "@/data/notes";
@@ -42,18 +42,40 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   );
 
   return (
-    <main className="mx-auto grid min-h-screen max-w-7xl grid-cols-1 px-4 pt-4 sm:px-6 sm:pt-6 lg:grid-cols-[minmax(16rem,1fr)_minmax(0,2fr)] lg:grid-rows-[auto_auto_1fr] lg:gap-x-8">
-      <header className="mb-6 lg:col-start-2 lg:row-start-1">
-        <h1 className="text-2xl font-semibold">Fleet Note Triage</h1>
-        <p className="mt-1 text-gray-600">Open and resolved vehicle issues, ordered by urgency.</p>
+    <>
+      <header className="flex h-14 items-center border-b-2 border-orange-500 bg-gray-950 px-4 text-white sm:px-7">
+        <span className="text-sm font-bold tracking-tight">Fleet Note Triage</span>
       </header>
-      <div className="pb-6 lg:col-start-2 lg:row-start-2">
-        <NoteControls query={query} />
-      </div>
-      <div className="pb-6 lg:col-start-2 lg:row-start-3">{noteList}</div>
-      <aside className="sticky bottom-0 mt-auto bg-white pt-4 pb-4 lg:top-6 lg:bottom-auto lg:col-start-1 lg:row-start-1 lg:row-span-3 lg:mt-0 lg:self-start lg:pt-0 lg:pb-6">
-        <NoteComposer submitAction={submitNote} />
-      </aside>
-    </main>
+      <main className="mx-auto max-w-7xl px-3 pt-5 pb-[26rem] sm:px-6 lg:py-7">
+        <header className="ui-enter mb-5">
+          <h1 className="text-3xl font-bold tracking-tight">Fleet notes</h1>
+          <p className="mt-1 max-w-2xl text-sm leading-6 text-gray-600">
+            Capture technician issues, triage them automatically, and work the most urgent open
+            items first.
+          </p>
+        </header>
+        <div className="grid items-start gap-5 lg:grid-cols-3">
+          <aside className="ui-enter ui-enter-delay-1 fixed inset-x-0 bottom-0 z-20 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] [&>form]:max-h-[calc(100dvh-1rem)] [&>form]:overflow-y-auto [&>form]:shadow-[0_-12px_32px_rgb(0_0_0/0.12)] lg:sticky lg:inset-x-auto lg:top-5 lg:bottom-auto lg:p-0 lg:[&>form]:max-h-none lg:[&>form]:overflow-visible lg:[&>form]:shadow-none">
+            <NoteComposer submitAction={submitNote} />
+          </aside>
+          <section
+            aria-label="Fleet note dashboard"
+            className="ui-enter ui-enter-delay-2 overflow-hidden rounded-xl border border-gray-200 bg-white lg:col-span-2"
+          >
+            <header className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-start sm:justify-between sm:px-5">
+              <div>
+                <h2 className="text-lg font-bold tracking-tight">Notes</h2>
+                <p className="mt-1 text-xs leading-5 text-gray-500">
+                  Open issues are shown in priority order by default.
+                </p>
+              </div>
+              <NoteStatusTabs query={query} />
+            </header>
+            <NoteControls query={query} />
+            {noteList}
+          </section>
+        </div>
+      </main>
+    </>
   );
 }
