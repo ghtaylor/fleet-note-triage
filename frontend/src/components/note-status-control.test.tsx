@@ -31,7 +31,7 @@ describe("NoteStatusControl", () => {
     });
     renderStatusControl({ id: noteId, title: "Worn brake pads", status: "resolved" }, action);
 
-    fireEvent.click(screen.getByRole("button", { name: "Reopen note" }));
+    fireEvent.click(screen.getByRole("button", { name: "Reopen note: Worn brake pads" }));
 
     await waitFor(() => expect(action).toHaveBeenCalledOnce());
     expect(
@@ -46,7 +46,9 @@ describe("NoteStatusControl", () => {
     }));
     renderStatusControl({ id: noteId, title: "Worn brake pads", status: "open" }, action);
 
-    fireEvent.click(screen.getByRole("button", { name: "Resolve note" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Resolve note: Worn brake pads" }),
+    );
 
     await waitFor(() =>
       expect(
@@ -65,11 +67,13 @@ describe("NoteStatusControl", () => {
     );
     renderStatusControl({ id: noteId, title: "Worn brake pads", status: "open" }, action);
 
-    const resolveButton = screen.getByRole("button", { name: "Resolve note" });
+    const resolveButton = screen.getByRole("button", {
+      name: "Resolve note: Worn brake pads",
+    });
     fireEvent.click(resolveButton);
 
     expect(resolveButton).toBeDisabled();
-    expect(resolveButton).toHaveAccessibleName("Resolve note");
+    expect(resolveButton).toHaveAccessibleName("Resolve note: Worn brake pads");
 
     await act(async () => {
       completeChange?.({ status: "success", message: "Note resolved." });
@@ -83,7 +87,9 @@ describe("NoteStatusControl", () => {
     }));
     renderStatusControl({ id: noteId, title: "Worn brake pads", status: "open" }, action);
 
-    fireEvent.click(screen.getByRole("button", { name: "Resolve note" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Resolve note: Worn brake pads" }),
+    );
 
     await waitFor(() =>
       expect(

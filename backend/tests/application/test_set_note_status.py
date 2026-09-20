@@ -57,3 +57,15 @@ def test_set_note_status_rejects_a_missing_note() -> None:
         set_note_status(uuid4(), NoteStatus.RESOLVED, repository=repository)
 
     assert repository.updated_notes == []
+
+
+def test_set_note_status_rejects_a_note_removed_before_update() -> None:
+    class DisappearingNoteRepository(FakeNoteRepository):
+        def update_status(self, note: Note) -> bool:
+            self.notes.clear()
+            return False
+
+    repository = DisappearingNoteRepository(make_note())
+
+    with pytest.raises(NoteNotFound):
+        set_note_status(NOTE_ID, NoteStatus.RESOLVED, repository=repository)

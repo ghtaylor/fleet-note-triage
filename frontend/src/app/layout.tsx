@@ -1,7 +1,13 @@
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Toaster } from "sonner";
 
 import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "Fleet Note Triage",
+  description: "Capture, triage, and track fleet issues.",
+};
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (

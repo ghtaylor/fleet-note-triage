@@ -25,6 +25,6 @@ def set_note_status(
     updated_note = (
         note.resolve(clock()) if status is NoteStatus.RESOLVED else note.reopen()
     )
-    if updated_note is not note:
-        repository.update_status(updated_note)
+    if updated_note is not note and not repository.update_status(updated_note):
+        raise NoteNotFound(str(note_id))
     return updated_note

@@ -79,11 +79,12 @@ class SqlAlchemyNoteRepository(NoteRepository):
             total=total,
         )
 
-    def update_status(self, note: Note) -> None:
+    def update_status(self, note: Note) -> bool:
         record = self._session.get(NoteRecord, str(note.id))
         if record is None:
-            raise LookupError(f"Note {note.id} does not exist")
+            return False
         record.resolved_at = note.resolved_at
+        return True
 
 
 def _to_note(record: NoteRecord) -> Note:

@@ -53,10 +53,10 @@ class FakeNoteRepository:
             total=len(notes),
         )
 
-    def update_status(self, note: Note) -> None:
+    def update_status(self, note: Note) -> bool:
         for index, existing_note in enumerate(self.notes):
             if existing_note.id == note.id:
                 self.notes[index] = note
                 self.updated_notes.append(note)
-                return
-        raise LookupError(f"Note {note.id} does not exist")
+                return True
+        return False

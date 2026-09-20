@@ -73,11 +73,13 @@ export function NoteComposer({ submitAction }: { submitAction: NoteSubmissionAct
         required
         maxLength={2000}
         disabled={isPending}
-        aria-describedby="source-text-hint"
+        aria-describedby={
+          state.status === "error" ? "source-text-hint source-text-error" : "source-text-hint"
+        }
         aria-invalid={state.status === "error"}
         placeholder="e.g. Brake pedal on car 18 feels soft after two laps."
         rows={6}
-        className="block w-full resize-none rounded-lg border border-gray-300 p-3 text-sm leading-6 outline-none placeholder:text-gray-400 focus:border-orange-500 focus:ring-3 focus:ring-orange-500/15 disabled:bg-gray-50"
+        className="block w-full resize-none rounded-lg border border-gray-300 p-3 text-sm leading-6 outline-none placeholder:text-gray-400 focus:border-orange-600 focus:ring-3 focus:ring-orange-600/15 disabled:bg-gray-50"
       />
       <p
         id="source-text-hint"
@@ -89,10 +91,15 @@ export function NoteComposer({ submitAction }: { submitAction: NoteSubmissionAct
           ? "Extracting title, category, and priority…"
           : "Describe one vehicle issue per note. Press Enter to submit or Shift + Enter for a new line."}
       </p>
+      {state.status === "error" ? (
+        <p id="source-text-error" className="mt-2 text-xs leading-5 text-red-700">
+          {state.message}
+        </p>
+      ) : null}
       <button
         type="submit"
         disabled={isPending}
-        className="mt-4 min-h-11 w-full rounded-lg bg-orange-500 px-4 py-2 font-bold text-gray-950 hover:bg-orange-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600 disabled:cursor-not-allowed disabled:bg-gray-300"
+        className="mt-4 min-h-11 w-full cursor-pointer rounded-lg bg-orange-500 px-4 py-2 font-bold text-gray-950 hover:bg-orange-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600 disabled:cursor-not-allowed disabled:bg-gray-300"
       >
         Submit note
       </button>

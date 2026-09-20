@@ -22,7 +22,7 @@ export type NoteListProps =
     };
 
 const paginationLinkClassName =
-  "rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-bold text-gray-700 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500";
+  "rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-bold text-gray-700 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600";
 
 function NotePaginationControls({
   itemsOnPage,

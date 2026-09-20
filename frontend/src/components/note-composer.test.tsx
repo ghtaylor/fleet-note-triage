@@ -54,6 +54,9 @@ describe("NoteComposer", () => {
       ).toBeInTheDocument(),
     );
     expect(sourceText).toHaveValue("unclear");
+    expect(sourceText).toHaveAccessibleDescription(
+      /Describe one vehicle issue per note.*Describe a specific vehicle issue and try again\./,
+    );
   });
 
   it("shows the analysis state and prevents another submission while pending", async () => {

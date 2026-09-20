@@ -37,7 +37,20 @@ describe("NoteControls", () => {
     expect(screen.getByRole("link", { name: "Open" })).toHaveAttribute("aria-current", "page");
     expect(screen.getByRole("combobox", { name: "Sort by" })).toHaveValue("created_at");
     expect(screen.getByRole("combobox", { name: "Direction" })).toHaveValue("asc");
-    expect(screen.getByRole("link", { name: "Clear filters" })).toHaveAttribute("href", "/");
+    expect(screen.getByRole("link", { name: "Clear filters" })).toHaveAttribute(
+      "href",
+      "/?sort_by=created_at&direction=asc",
+    );
+  });
+
+  it("hides clearing when category and priority filters are inactive", () => {
+    render(
+      <NoteControls
+        query={{ status: "resolved", sortBy: "created_at", direction: "asc", page: 2 }}
+      />,
+    );
+
+    expect(screen.queryByRole("link", { name: "Clear filters" })).not.toBeInTheDocument();
   });
 
   it("links status tabs while preserving the active query", () => {
