@@ -22,13 +22,36 @@ describe("fetchNotes", () => {
   it("returns a validated note list", async () => {
     const request = async () => Response.json(noteListResponse);
 
-    await expect(fetchNotes("http://localhost:8000", request)).resolves.toEqual(noteListResponse);
+    await expect(fetchNotes("http://localhost:8000", {}, request)).resolves.toEqual(
+      noteListResponse,
+    );
+  });
+
+  it("sends filters and sorting as query parameters", async () => {
+    const request = async (input: RequestInfo | URL) => {
+      expect(input.toString()).toBe(
+        "http://localhost:8000/notes?category=mechanical&priority=high&status=open&sort_by=created_at&direction=asc",
+      );
+      return Response.json(noteListResponse);
+    };
+
+    await fetchNotes(
+      "http://localhost:8000",
+      {
+        category: "mechanical",
+        priority: "high",
+        status: "open",
+        sortBy: "created_at",
+        direction: "asc",
+      },
+      request,
+    );
   });
 
   it("rejects when the backend rejects the request", async () => {
     const request = async () => new Response(null, { status: 503 });
 
-    await expect(fetchNotes("http://localhost:8000", request)).rejects.toThrow(
+    await expect(fetchNotes("http://localhost:8000", {}, request)).rejects.toThrow(
       "Notes request failed with status 503",
     );
   });
@@ -36,7 +59,7 @@ describe("fetchNotes", () => {
   it("rejects when the backend response is invalid", async () => {
     const request = async () => Response.json({ items: "invalid", total: 1 });
 
-    await expect(fetchNotes("http://localhost:8000", request)).rejects.toThrow(
+    await expect(fetchNotes("http://localhost:8000", {}, request)).rejects.toThrow(
       "Notes response did not match the API contract",
     );
   });
@@ -48,7 +71,7 @@ describe("fetchNotes", () => {
     };
     const request = async () => Response.json(response);
 
-    await expect(fetchNotes("http://localhost:8000", request)).rejects.toThrow(
+    await expect(fetchNotes("http://localhost:8000", {}, request)).rejects.toThrow(
       "Notes response did not match the API contract",
     );
   });

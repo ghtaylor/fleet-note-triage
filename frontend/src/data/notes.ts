@@ -1,15 +1,24 @@
-import type { NoteListResponse } from "../api/types.gen";
-import { zNoteListResponse } from "../api/zod.gen";
+import type { NoteListResponse } from "@/api/types.gen";
+import { zNoteListResponse } from "@/api/zod.gen";
+import type { NoteQuery } from "@/data/note-query";
 
 const NOTES_REQUEST_TIMEOUT_MS = 5_000;
 
 export async function fetchNotes(
   backendUrl: string,
+  query: Partial<NoteQuery> = {},
   request: typeof fetch = fetch,
 ): Promise<NoteListResponse> {
+  const url = new URL("/notes", backendUrl);
+  if (query.category) url.searchParams.set("category", query.category);
+  if (query.priority) url.searchParams.set("priority", query.priority);
+  if (query.status) url.searchParams.set("status", query.status);
+  if (query.sortBy) url.searchParams.set("sort_by", query.sortBy);
+  if (query.direction) url.searchParams.set("direction", query.direction);
+
   let response: Response;
   try {
-    response = await request(new URL("/notes", backendUrl), {
+    response = await request(url, {
       cache: "no-store",
       signal: AbortSignal.timeout(NOTES_REQUEST_TIMEOUT_MS),
     });

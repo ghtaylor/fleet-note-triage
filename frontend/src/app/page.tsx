@@ -1,20 +1,23 @@
 import { submitNote } from "@/app/actions";
 import { NoteComposer } from "@/components/note-composer";
+import { NoteControls } from "@/components/note-controls";
 import { NoteList } from "@/components/note-list";
+import { parseNoteQuery, type NoteQuery } from "@/data/note-query";
 import { fetchNotes } from "@/data/notes";
 
-async function loadNotes(backendUrl: string) {
+async function loadNotes(backendUrl: string, query: NoteQuery) {
   try {
-    return await fetchNotes(backendUrl);
+    return await fetchNotes(backendUrl, query);
   } catch (error) {
     console.error("Failed to load fleet notes", error);
     return null;
   }
 }
 
-export default async function Home() {
+export default async function Home({ searchParams }: PageProps<"/">) {
+  const query = parseNoteQuery(await searchParams);
   const backendUrl = process.env.BACKEND_URL;
-  const notes = backendUrl ? await loadNotes(backendUrl) : null;
+  const notes = backendUrl ? await loadNotes(backendUrl, query) : null;
   const noteList = notes ? (
     <NoteList
       availability="available"
@@ -41,6 +44,7 @@ export default async function Home() {
         <h1 className="text-2xl font-semibold">Fleet Note Triage</h1>
         <p className="mt-1 text-gray-600">Open and resolved vehicle issues, ordered by urgency.</p>
       </header>
+      <NoteControls query={query} />
       <div className="pb-6">{noteList}</div>
       <NoteComposer submitAction={submitNote} />
     </main>
