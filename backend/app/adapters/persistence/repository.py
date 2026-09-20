@@ -43,6 +43,12 @@ class SqlAlchemyNoteRepository(NoteRepository):
             ),
         )
 
+    def update_status(self, note: Note) -> None:
+        record = self._session.get(NoteRecord, str(note.id))
+        if record is None:
+            raise LookupError(f"Note {note.id} does not exist")
+        record.resolved_at = note.resolved_at
+
 
 def _restore_utc(timestamp: datetime) -> datetime:
     if timestamp.tzinfo is None:

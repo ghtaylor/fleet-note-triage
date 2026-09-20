@@ -12,6 +12,7 @@ from app.domain.extraction import (
     UnactionableExtraction,
 )
 from app.domain.note import Note, NoteCategory, NotePriority, NoteStatus
+from test_support.fakes import FakeNoteRepository
 
 NOTE_ID = UUID("6d6b7456-208d-4324-b120-5c2bd25d81d0")
 CREATED_AT = datetime(2026, 3, 1, 9, 30, tzinfo=UTC)
@@ -27,17 +28,6 @@ class FakeNoteExtractor:
         if isinstance(self.outcome, Exception):
             raise self.outcome
         return self.outcome
-
-
-class FakeNoteRepository:
-    def __init__(self) -> None:
-        self.notes: list[Note] = []
-
-    def add(self, note: Note) -> None:
-        self.notes.append(note)
-
-    def get(self, note_id: UUID) -> Note | None:
-        return next((note for note in self.notes if note.id == note_id), None)
 
 
 def submit(

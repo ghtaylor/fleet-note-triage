@@ -22,7 +22,7 @@ dev = [
 pythonpath = ["."]
 
 [tool.pyright]
-include = ["app", "tests"]
+include = ["app", "test_support", "tests"]
 pythonVersion = "3.12"
 typeCheckingMode = "standard"
 venvPath = "."

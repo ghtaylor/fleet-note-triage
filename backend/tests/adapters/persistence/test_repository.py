@@ -48,6 +48,32 @@ def test_repository_round_trips_note(
         assert repository.get(NOTE_ID) == note
 
 
+def test_repository_updates_note_status(
+    migrated_session_factory: sessionmaker[Session],
+) -> None:
+    note = Note(
+        id=NOTE_ID,
+        source_text="Brake pads worn on car 12",
+        title="Worn brake pads on car 12",
+        category=NoteCategory.MECHANICAL,
+        priority=NotePriority.HIGH,
+        created_at=datetime(2026, 3, 1, 9, 30, tzinfo=UTC),
+    )
+    resolved_note = note.resolve(datetime(2026, 3, 1, 10, 45, tzinfo=UTC))
+
+    with migrated_session_factory() as session:
+        repository = SqlAlchemyNoteRepository(session)
+        repository.add(note)
+        session.commit()
+        repository.update_status(resolved_note)
+        session.commit()
+
+    with migrated_session_factory() as session:
+        repository = SqlAlchemyNoteRepository(session)
+
+        assert repository.get(NOTE_ID) == resolved_note
+
+
 def test_repository_returns_none_for_missing_note(
     migrated_session_factory: sessionmaker[Session],
 ) -> None:
