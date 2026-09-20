@@ -1,30 +1,26 @@
-const HEALTH_CHECK_TIMEOUT_MS = 2_000;
+import { NoteList } from "@/components/note-list";
+import { fetchNotes } from "@/data/notes";
 
-async function isBackendHealthy(): Promise<boolean> {
-  const backendUrl = process.env.BACKEND_URL;
-
-  if (!backendUrl) {
-    throw new Error("BACKEND_URL is required");
-  }
-
+async function loadNotes(backendUrl: string) {
   try {
-    const response = await fetch(new URL("/health", backendUrl), {
-      cache: "no-store",
-      signal: AbortSignal.timeout(HEALTH_CHECK_TIMEOUT_MS),
-    });
-
-    return response.ok;
-  } catch {
-    return false;
+    return await fetchNotes(backendUrl);
+  } catch (error) {
+    console.error("Failed to load fleet notes", error);
+    return null;
   }
 }
 
 export default async function Home() {
-  const isHealthy = await isBackendHealthy();
+  const backendUrl = process.env.BACKEND_URL;
+  const notes = backendUrl ? await loadNotes(backendUrl) : null;
 
   return (
-    <span className="text-lg font-semibold">
-      Backend is {isHealthy ? "healthy" : "not healthy"}
-    </span>
+    <main className="mx-auto max-w-4xl p-4 sm:p-6">
+      <header className="mb-6">
+        <h1 className="text-2xl font-semibold">Fleet Note Triage</h1>
+        <p className="mt-1 text-gray-600">Open and resolved vehicle issues, ordered by urgency.</p>
+      </header>
+      <NoteList notes={notes} />
+    </main>
   );
 }

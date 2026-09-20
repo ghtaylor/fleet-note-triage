@@ -9,5 +9,5 @@ if (!backendUrl) {
 export default defineConfig({
   input: new URL("/openapi.json", backendUrl).toString(),
   output: "src/api",
-  plugins: ["@hey-api/typescript"],
+  plugins: ["@hey-api/typescript", { name: "zod", dates: { offset: true } }],
 });
