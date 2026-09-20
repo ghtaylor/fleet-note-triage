@@ -43,7 +43,13 @@ describe("NoteControls", () => {
   it("links status tabs while preserving the active query", () => {
     render(
       <NoteStatusTabs
-        query={{ category: "mechanical", sortBy: "priority", direction: "desc", page: 2 }}
+        query={{
+          category: "mechanical",
+          status: "open",
+          sortBy: "priority",
+          direction: "desc",
+          page: 2,
+        }}
       />,
     );
 
@@ -53,8 +59,20 @@ describe("NoteControls", () => {
     );
   });
 
+  it("links to all statuses explicitly", () => {
+    render(
+      <NoteStatusTabs
+        query={{ status: "open", sortBy: "priority", direction: "desc", page: 1 }}
+      />,
+    );
+
+    expect(screen.getByRole("link", { name: "All" })).toHaveAttribute("href", "/?status=all");
+  });
+
   it("updates the URL immediately and omits default query parameters", () => {
-    render(<NoteControls query={{ sortBy: "priority", direction: "desc", page: 1 }} />);
+    render(
+      <NoteControls query={{ status: "open", sortBy: "priority", direction: "desc", page: 1 }} />,
+    );
 
     fireEvent.change(screen.getByRole("combobox", { name: "Category" }), {
       target: { value: "mechanical" },
@@ -66,7 +84,13 @@ describe("NoteControls", () => {
   it("removes a query parameter when its default is selected", () => {
     render(
       <NoteControls
-        query={{ category: "mechanical", sortBy: "created_at", direction: "desc", page: 1 }}
+        query={{
+          category: "mechanical",
+          status: "open",
+          sortBy: "created_at",
+          direction: "desc",
+          page: 1,
+        }}
       />,
     );
 

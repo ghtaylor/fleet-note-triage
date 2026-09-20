@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parseNoteQuery } from "@/data/note-query";
+import { createNoteSearchParams, parseNoteQuery } from "@/data/note-query";
 
 describe("parseNoteQuery", () => {
   it("parses supported filters and sorting", () => {
@@ -35,11 +35,25 @@ describe("parseNoteQuery", () => {
     ).toEqual({
       category: undefined,
       priority: "critical",
-      status: undefined,
+      status: "open",
       sortBy: "priority",
       direction: "desc",
       page: 1,
     });
+  });
+
+  it("uses an explicit value to show all statuses", () => {
+    const query = parseNoteQuery({ status: "all" });
+
+    expect(query.status).toBeUndefined();
+    expect(createNoteSearchParams(query).get("status")).toBe("all");
+  });
+
+  it("omits the default open status", () => {
+    const query = parseNoteQuery({});
+
+    expect(query.status).toBe("open");
+    expect(createNoteSearchParams(query).has("status")).toBe(false);
   });
 
   it("defaults invalid page values to the first page", () => {

@@ -37,7 +37,8 @@ export function createNoteSearchParams(query: NoteQuery) {
   const searchParams = new URLSearchParams();
   if (query.category) searchParams.set("category", query.category);
   if (query.priority) searchParams.set("priority", query.priority);
-  if (query.status) searchParams.set("status", query.status);
+  if (!query.status) searchParams.set("status", "all");
+  else if (query.status !== "open") searchParams.set("status", query.status);
   if (query.sortBy !== "priority") searchParams.set("sort_by", query.sortBy);
   if (query.direction !== "desc") searchParams.set("direction", query.direction);
   if (query.page > 1) searchParams.set("page", String(query.page));
@@ -55,7 +56,10 @@ export function parseNoteQuery(
   return {
     category: parseOptional(zNoteCategory.safeParse(searchParams.category)),
     priority: parseOptional(zNotePriority.safeParse(searchParams.priority)),
-    status: parseOptional(zNoteStatus.safeParse(searchParams.status)),
+    status:
+      searchParams.status === "all"
+        ? undefined
+        : (parseOptional(zNoteStatus.safeParse(searchParams.status)) ?? "open"),
     sortBy: parseOptional(zNoteSortField.safeParse(searchParams.sort_by)) ?? "priority",
     direction: parseOptional(zSortDirection.safeParse(searchParams.direction)) ?? "desc",
     page: parsePage(searchParams.page),
