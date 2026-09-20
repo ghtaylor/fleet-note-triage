@@ -26,6 +26,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
     <NoteList
       availability="available"
       total={notes.total}
+      hasActiveFilters={Boolean(query.category || query.priority || query.status)}
       pagination={{
         page: query.page,
         pageSize: NOTES_PAGE_SIZE,

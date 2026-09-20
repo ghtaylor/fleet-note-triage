@@ -55,7 +55,7 @@ export function NoteCard({
             {note.title}
           </h3>
         </div>
-        <p className="mt-1 truncate pl-4 text-xs leading-5 text-gray-600">
+        <p className="mt-1 break-words pl-4 text-xs leading-5 text-gray-600">
           “{note.sourceText}”
         </p>
         <p className="mt-1 pl-4 text-xs text-gray-500">

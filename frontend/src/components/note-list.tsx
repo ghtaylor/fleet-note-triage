@@ -16,6 +16,7 @@ export type NoteListProps =
       availability: "available";
       items: readonly NoteCardNote[];
       total: number;
+      hasActiveFilters: boolean;
       pagination: NotePagination;
       changeStatusAction: NoteStatusAction;
     };
@@ -92,7 +93,9 @@ export function NoteList(props: NoteListProps) {
   if (props.total === 0) {
     return (
       <p className="px-5 py-10 text-center text-sm text-gray-500">
-        No fleet notes have been submitted.
+        {props.hasActiveFilters
+          ? "No notes match these filters."
+          : "No fleet notes have been submitted."}
       </p>
     );
   }

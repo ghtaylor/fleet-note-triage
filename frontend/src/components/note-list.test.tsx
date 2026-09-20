@@ -23,6 +23,7 @@ const notes = {
     },
   ],
   total: 1,
+  hasActiveFilters: false,
   pagination: { page: 1, pageSize: 10 },
   changeStatusAction,
 } satisfies NoteListProps;
@@ -42,6 +43,7 @@ describe("NoteList", () => {
         availability="available"
         items={[]}
         total={0}
+        hasActiveFilters={false}
         pagination={{ page: 1, pageSize: 10 }}
         changeStatusAction={changeStatusAction}
       />,
@@ -50,12 +52,28 @@ describe("NoteList", () => {
     expect(screen.getByText("No fleet notes have been submitted.")).toBeInTheDocument();
   });
 
+  it("shows a filtered empty state when no notes match", () => {
+    render(
+      <NoteList
+        availability="available"
+        items={[]}
+        total={0}
+        hasActiveFilters
+        pagination={{ page: 1, pageSize: 10 }}
+        changeStatusAction={changeStatusAction}
+      />,
+    );
+
+    expect(screen.getByText("No notes match these filters.")).toBeInTheDocument();
+  });
+
   it("shows the note count and note details", () => {
     render(
       <NoteList
         availability="available"
         items={notes.items}
         total={notes.total}
+        hasActiveFilters={notes.hasActiveFilters}
         pagination={notes.pagination}
         changeStatusAction={notes.changeStatusAction}
       />,
