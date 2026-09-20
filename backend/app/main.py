@@ -1,15 +1,6 @@
-from typing import Literal
-
 from fastapi import FastAPI
-from pydantic import BaseModel
+
+from app.api import router
 
 app = FastAPI()
-
-
-class HealthResponse(BaseModel):
-    status: Literal["ok"]
-
-
-@app.get("/health", response_model=HealthResponse)
-def get_health() -> HealthResponse:
-    return HealthResponse(status="ok")
+app.include_router(router)
