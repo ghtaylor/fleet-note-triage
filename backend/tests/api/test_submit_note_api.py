@@ -114,3 +114,17 @@ def test_submit_note_rejects_invalid_source_text_without_extraction(
 
     assert response.status_code == 422
     assert extractor.source_texts == []
+
+
+def test_submit_note_validates_source_text_before_extractor_configuration(
+    client: TestClient,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("OPENAI_API_KEY", "")
+    get_note_extractor.cache_clear()
+    app.dependency_overrides[get_note_extractor] = get_note_extractor
+
+    response = client.post("/notes", json={"source_text": "   "})
+
+    assert response.status_code == 422
+    get_note_extractor.cache_clear()

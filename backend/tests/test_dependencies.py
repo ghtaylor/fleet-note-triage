@@ -1,10 +1,10 @@
 from typing import Any, ClassVar
 
 import pytest
-from fastapi import HTTPException
 
 from app import dependencies
 from app.adapters.extraction.openai_extractor import OpenAINoteExtractor
+from app.application.errors import ExtractionUnavailable
 
 
 class FakeOpenAIClient:
@@ -40,9 +40,8 @@ def test_note_extractor_is_unavailable_without_api_key(
     monkeypatch.setenv("OPENAI_API_KEY", "")
     dependencies.get_note_extractor.cache_clear()
 
-    with pytest.raises(HTTPException) as caught:
-        dependencies.get_note_extractor()
+    extractor = dependencies.get_note_extractor()
 
-    assert caught.value.status_code == 503
-    assert caught.value.detail == "extraction_unavailable"
+    with pytest.raises(ExtractionUnavailable, match="API key is not configured"):
+        extractor.extract("Brake pads worn")
     dependencies.get_note_extractor.cache_clear()

@@ -4,14 +4,16 @@ from functools import cache
 from typing import Annotated
 from uuid import UUID, uuid4
 
-from fastapi import Depends, HTTPException
+from fastapi import Depends
 from openai import OpenAI as OpenAIClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.adapters.extraction.openai_extractor import OpenAINoteExtractor
 from app.adapters.persistence.repository import SqlAlchemyNoteRepository
+from app.application.errors import ExtractionUnavailable
 from app.config import Settings
+from app.domain.extraction import ExtractionResult
 from app.ports import NoteExtractor, NoteRepository
 
 _engine = create_engine(Settings().database_url)
@@ -19,21 +21,26 @@ _session_factory = sessionmaker(_engine)
 
 
 def get_note_repository() -> Iterator[NoteRepository]:
-    with _session_factory() as session:
+    with _session_factory.begin() as session:
         yield SqlAlchemyNoteRepository(session)
 
 
 NoteRepositoryDependency = Annotated[
     NoteRepository,
-    Depends(get_note_repository),
+    Depends(get_note_repository, scope="function"),
 ]
+
+
+class _UnavailableNoteExtractor:
+    def extract(self, source_text: str) -> ExtractionResult:
+        raise ExtractionUnavailable("OpenAI API key is not configured")
 
 
 @cache
 def get_note_extractor() -> NoteExtractor:
     settings = Settings()
     if settings.openai_api_key is None:
-        raise HTTPException(status_code=503, detail="extraction_unavailable")
+        return _UnavailableNoteExtractor()
 
     client = OpenAIClient(
         api_key=settings.openai_api_key.get_secret_value(),
