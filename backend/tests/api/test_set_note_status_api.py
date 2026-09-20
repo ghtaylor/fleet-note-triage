@@ -5,7 +5,7 @@ from uuid import UUID, uuid4
 import pytest
 from fastapi.testclient import TestClient
 
-from app.api import get_current_time, get_note_repository
+from app.dependencies import get_current_time, get_note_repository
 from app.domain.note import Note, NoteCategory, NotePriority
 from app.main import app
 from test_support.fakes import FakeNoteRepository

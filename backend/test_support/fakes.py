@@ -1,7 +1,20 @@
 from uuid import UUID
 
+from app.domain.extraction import ExtractionResult
 from app.domain.note import Note
 from app.ports import NotePage, NoteQuery, NoteSortField, SortDirection
+
+
+class FakeNoteExtractor:
+    def __init__(self, outcome: ExtractionResult | Exception) -> None:
+        self.outcome = outcome
+        self.source_texts: list[str] = []
+
+    def extract(self, source_text: str) -> ExtractionResult:
+        self.source_texts.append(source_text)
+        if isinstance(self.outcome, Exception):
+            raise self.outcome
+        return self.outcome
 
 
 class FakeNoteRepository:

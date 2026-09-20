@@ -1,72 +1,63 @@
-from collections.abc import Iterator
-from datetime import UTC, datetime
-from typing import Annotated, Literal
+from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel, ConfigDict
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from fastapi import APIRouter, HTTPException, Query
 
-from app.adapters.persistence.repository import SqlAlchemyNoteRepository
-from app.application.errors import NoteNotFound
+from app.application.errors import (
+    ExtractionUnavailable,
+    NoteNotFound,
+    SourceTextNotActionable,
+)
 from app.application.set_note_status import set_note_status
-from app.config import Settings
+from app.application.submit_note import submit_note
+from app.dependencies import (
+    CurrentTimeDependency,
+    NoteExtractorDependency,
+    NoteIdDependency,
+    NoteRepositoryDependency,
+)
 from app.domain.note import NoteCategory, NotePriority, NoteStatus
-from app.ports import NoteQuery, NoteRepository, NoteSortField, SortDirection
+from app.ports import NoteQuery, NoteSortField, SortDirection
+from app.schemas import (
+    HealthResponse,
+    NoteListResponse,
+    NoteResponse,
+    SetNoteStatusRequest,
+    SubmitNoteRequest,
+)
 
 router = APIRouter()
-_engine = create_engine(Settings().database_url)
-_session_factory = sessionmaker(_engine)
-
-
-def get_note_repository() -> Iterator[NoteRepository]:
-    with _session_factory() as session:
-        yield SqlAlchemyNoteRepository(session)
-
-
-NoteRepositoryDependency = Annotated[
-    NoteRepository,
-    Depends(get_note_repository),
-]
-
-
-def get_current_time() -> datetime:
-    return datetime.now(UTC)
-
-
-CurrentTimeDependency = Annotated[datetime, Depends(get_current_time)]
-
-
-class HealthResponse(BaseModel):
-    status: Literal["ok"]
-
-
-class NoteResponse(BaseModel):
-    id: UUID
-    source_text: str
-    title: str
-    category: NoteCategory
-    priority: NotePriority
-    status: NoteStatus
-    created_at: datetime
-    resolved_at: datetime | None
-
-    model_config = ConfigDict(from_attributes=True)
-
-
-class NoteListResponse(BaseModel):
-    items: list[NoteResponse]
-    total: int
-
-
-class SetNoteStatusRequest(BaseModel):
-    status: NoteStatus
 
 
 @router.get("/health", response_model=HealthResponse)
 def get_health() -> HealthResponse:
     return HealthResponse(status="ok")
+
+
+@router.post("/notes", response_model=NoteResponse, status_code=201)
+def post_note(
+    request: SubmitNoteRequest,
+    extractor: NoteExtractorDependency,
+    repository: NoteRepositoryDependency,
+    note_id: NoteIdDependency,
+    current_time: CurrentTimeDependency,
+) -> NoteResponse:
+    try:
+        note = submit_note(
+            request.source_text,
+            extractor=extractor,
+            repository=repository,
+            id_factory=lambda: note_id,
+            clock=lambda: current_time,
+        )
+    except SourceTextNotActionable as error:
+        raise HTTPException(
+            status_code=422,
+            detail="source_text_not_actionable",
+        ) from error
+    except ExtractionUnavailable as error:
+        raise HTTPException(status_code=503, detail="extraction_unavailable") from error
+    return NoteResponse.model_validate(note)
 
 
 @router.patch("/notes/{note_id}", response_model=NoteResponse)

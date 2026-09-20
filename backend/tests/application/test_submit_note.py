@@ -6,28 +6,12 @@ from pydantic import ValidationError
 
 from app.application.errors import ExtractionUnavailable, SourceTextNotActionable
 from app.application.submit_note import submit_note
-from app.domain.extraction import (
-    ExtractedNoteData,
-    ExtractionResult,
-    UnactionableExtraction,
-)
+from app.domain.extraction import ExtractedNoteData, UnactionableExtraction
 from app.domain.note import Note, NoteCategory, NotePriority, NoteStatus
-from test_support.fakes import FakeNoteRepository
+from test_support.fakes import FakeNoteExtractor, FakeNoteRepository
 
 NOTE_ID = UUID("6d6b7456-208d-4324-b120-5c2bd25d81d0")
 CREATED_AT = datetime(2026, 3, 1, 9, 30, tzinfo=UTC)
-
-
-class FakeNoteExtractor:
-    def __init__(self, outcome: ExtractionResult | Exception) -> None:
-        self.outcome = outcome
-        self.source_texts: list[str] = []
-
-    def extract(self, source_text: str) -> ExtractionResult:
-        self.source_texts.append(source_text)
-        if isinstance(self.outcome, Exception):
-            raise self.outcome
-        return self.outcome
 
 
 def submit(

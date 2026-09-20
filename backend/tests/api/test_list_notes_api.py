@@ -5,7 +5,7 @@ from uuid import UUID
 import pytest
 from fastapi.testclient import TestClient
 
-from app.api import get_note_repository
+from app.dependencies import get_note_repository
 from app.domain.note import Note, NoteCategory, NotePriority, NoteStatus
 from app.main import app
 from app.ports import NoteQuery, NoteSortField, SortDirection
