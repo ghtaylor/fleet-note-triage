@@ -1,3 +1,4 @@
+import logging
 from typing import Annotated
 from uuid import UUID
 
@@ -27,6 +28,8 @@ from app.schemas import (
     SetNoteStatusRequest,
     SubmitNoteRequest,
 )
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(responses={500: {"model": ErrorResponse}})
 
@@ -61,12 +64,21 @@ def post_note(
             clock=lambda: current_time,
         )
     except SourceTextNotActionable as error:
+        logger.info("Note submission rejected as not actionable")
         raise HTTPException(
             status_code=422,
             detail="source_text_not_actionable",
         ) from error
     except ExtractionUnavailable as error:
+        logger.warning("Note extraction unavailable: %s", error)
         raise HTTPException(status_code=503, detail="extraction_unavailable") from error
+
+    logger.info(
+        "Created note %s with category=%s priority=%s",
+        note.id,
+        note.category,
+        note.priority,
+    )
     return NoteResponse.model_validate(note)
 
 
@@ -90,6 +102,8 @@ def patch_note(
         )
     except NoteNotFound as error:
         raise HTTPException(status_code=404, detail="note_not_found") from error
+
+    logger.info("Set note %s status to %s", note.id, note.status)
     return NoteResponse.model_validate(note)
 
 

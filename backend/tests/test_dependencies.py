@@ -1,3 +1,4 @@
+import logging
 from typing import Any, ClassVar
 
 import pytest
@@ -36,12 +37,15 @@ def test_note_extractor_uses_openai_settings(
 
 def test_note_extractor_is_unavailable_without_api_key(
     monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     monkeypatch.setenv("OPENAI_API_KEY", "")
     dependencies.get_note_extractor.cache_clear()
 
-    extractor = dependencies.get_note_extractor()
+    with caplog.at_level(logging.WARNING, logger="app.dependencies"):
+        extractor = dependencies.get_note_extractor()
 
     with pytest.raises(ExtractionUnavailable, match="API key is not configured"):
         extractor.extract("Brake pads worn")
+    assert "OPENAI_API_KEY is not configured" in caplog.text
     dependencies.get_note_extractor.cache_clear()

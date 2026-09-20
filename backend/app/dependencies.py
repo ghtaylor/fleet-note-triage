@@ -1,3 +1,4 @@
+import logging
 from collections.abc import Iterator
 from datetime import UTC, datetime
 from functools import cache
@@ -15,6 +16,8 @@ from app.application.errors import ExtractionUnavailable
 from app.config import Settings
 from app.domain.extraction import ExtractionResult
 from app.ports import NoteExtractor, NoteRepository
+
+logger = logging.getLogger(__name__)
 
 _engine = create_engine(Settings().database_url)
 _session_factory = sessionmaker(_engine)
@@ -40,8 +43,12 @@ class _UnavailableNoteExtractor:
 def get_note_extractor() -> NoteExtractor:
     settings = Settings()
     if settings.openai_api_key is None:
+        logger.warning(
+            "OPENAI_API_KEY is not configured; note submission is unavailable"
+        )
         return _UnavailableNoteExtractor()
 
+    logger.info("Configuring note extraction with model %s", settings.openai_model)
     client = OpenAIClient(
         api_key=settings.openai_api_key.get_secret_value(),
         timeout=settings.openai_timeout_seconds,

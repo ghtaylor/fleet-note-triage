@@ -1,3 +1,4 @@
+import logging
 from collections.abc import Iterator
 from datetime import UTC, datetime
 from uuid import UUID
@@ -94,13 +95,16 @@ def test_submit_note_returns_extraction_unavailable_error(
     client: TestClient,
     extractor: FakeNoteExtractor,
     repository: FakeNoteRepository,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     extractor.outcome = ExtractionUnavailable("provider timed out")
 
-    response = client.post("/notes", json={"source_text": "Brake pads worn"})
+    with caplog.at_level(logging.WARNING, logger="app.api"):
+        response = client.post("/notes", json={"source_text": "Brake pads worn"})
 
     assert response.status_code == 503
     assert response.json() == {"detail": "extraction_unavailable"}
+    assert "Note extraction unavailable: provider timed out" in caplog.text
     assert repository.notes == []
 
 
