@@ -51,7 +51,7 @@ export function NoteCard({
       </dl>
       <div className="mt-4">
         <NoteStatusControl
-          note={{ id: note.id, status: note.status }}
+          note={{ id: note.id, title: note.title, status: note.status }}
           changeStatusAction={changeStatusAction}
         />
       </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type ReactNode, useTransition } from "react";
@@ -163,7 +164,14 @@ export function NoteControls({ query }: { query: NoteQuery }) {
           <option value="asc">Ascending</option>
         </SelectField>
       </div>
-      <p role="status" aria-live="polite" className="mt-2 min-h-5 text-sm text-gray-500">
+      <p
+        role="status"
+        aria-live="polite"
+        className={clsx(
+          "mt-2 min-h-5 text-sm text-gray-500 transition-opacity duration-150",
+          isPending ? "opacity-100 delay-200" : "opacity-0 delay-0",
+        )}
+      >
         {isPending ? "Updating notes…" : ""}
       </p>
     </section>
