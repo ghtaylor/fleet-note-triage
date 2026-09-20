@@ -84,7 +84,7 @@ export function NoteControls({ query }: { query: NoteQuery }) {
     <section
       aria-labelledby="note-controls-heading"
       aria-busy={isPending}
-      className="mb-6 rounded border border-gray-200 p-4"
+      className="rounded border border-gray-200 p-4"
     >
       <div className="flex items-center justify-between gap-3">
         <h2 id="note-controls-heading" className="font-medium">

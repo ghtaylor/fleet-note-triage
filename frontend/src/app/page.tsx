@@ -39,14 +39,18 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   );
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-4xl flex-col px-4 pt-4 sm:px-6 sm:pt-6">
-      <header className="mb-6">
+    <main className="mx-auto grid min-h-screen max-w-7xl grid-cols-1 px-4 pt-4 sm:px-6 sm:pt-6 lg:grid-cols-[minmax(16rem,1fr)_minmax(0,2fr)] lg:grid-rows-[auto_auto_1fr] lg:gap-x-8">
+      <header className="mb-6 lg:col-start-2 lg:row-start-1">
         <h1 className="text-2xl font-semibold">Fleet Note Triage</h1>
         <p className="mt-1 text-gray-600">Open and resolved vehicle issues, ordered by urgency.</p>
       </header>
-      <NoteControls query={query} />
-      <div className="pb-6">{noteList}</div>
-      <NoteComposer submitAction={submitNote} />
+      <div className="pb-6 lg:col-start-2 lg:row-start-2">
+        <NoteControls query={query} />
+      </div>
+      <div className="pb-6 lg:col-start-2 lg:row-start-3">{noteList}</div>
+      <aside className="sticky bottom-0 mt-auto bg-white pt-4 pb-4 lg:top-6 lg:bottom-auto lg:col-start-1 lg:row-start-1 lg:row-span-3 lg:mt-0 lg:self-start lg:pt-0 lg:pb-6">
+        <NoteComposer submitAction={submitNote} />
+      </aside>
     </main>
   );
 }
