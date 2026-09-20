@@ -17,6 +17,9 @@ dev = [
     "ruff>=0.16.8",
 ]
 
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
 [tool.pyright]
 include = ["app", "tests"]
 pythonVersion = "3.12"
