@@ -23,6 +23,7 @@ const notes = {
     },
   ],
   total: 1,
+  pagination: { page: 1, pageSize: 10 },
   changeStatusAction,
 } satisfies NoteListProps;
 
@@ -41,6 +42,7 @@ describe("NoteList", () => {
         availability="available"
         items={[]}
         total={0}
+        pagination={{ page: 1, pageSize: 10 }}
         changeStatusAction={changeStatusAction}
       />,
     );
@@ -54,6 +56,7 @@ describe("NoteList", () => {
         availability="available"
         items={notes.items}
         total={notes.total}
+        pagination={notes.pagination}
         changeStatusAction={notes.changeStatusAction}
       />,
     );
@@ -67,5 +70,27 @@ describe("NoteList", () => {
     expect(note).toHaveTextContent("Brake pads worn on car 12.");
     expect(within(note).getByText("high")).toBeInTheDocument();
     expect(within(note).getByText("mechanical")).toBeInTheDocument();
+    expect(screen.getByText("Showing 1–1 of 1")).toBeInTheDocument();
+    expect(screen.getByText("Page 1 of 1")).toBeInTheDocument();
+  });
+
+  it("links to the previous and next pages", () => {
+    render(
+      <NoteList
+        {...notes}
+        total={25}
+        pagination={{
+          page: 2,
+          pageSize: 10,
+          previousHref: "/?page=1",
+          nextHref: "/?page=3",
+        }}
+      />,
+    );
+
+    expect(screen.getByRole("link", { name: "Previous" })).toHaveAttribute("href", "/?page=1");
+    expect(screen.getByRole("link", { name: "Next" })).toHaveAttribute("href", "/?page=3");
+    expect(screen.getByText("Showing 11–11 of 25")).toBeInTheDocument();
+    expect(screen.getByText("Page 2 of 3")).toBeInTheDocument();
   });
 });

@@ -3,6 +3,7 @@ import { zNoteListResponse } from "@/api/zod.gen";
 import type { NoteQuery } from "@/data/note-query";
 
 const NOTES_REQUEST_TIMEOUT_MS = 5_000;
+export const NOTES_PAGE_SIZE = 10;
 
 export async function fetchNotes(
   backendUrl: string,
@@ -15,6 +16,9 @@ export async function fetchNotes(
   if (query.status) url.searchParams.set("status", query.status);
   if (query.sortBy) url.searchParams.set("sort_by", query.sortBy);
   if (query.direction) url.searchParams.set("direction", query.direction);
+  const page = query.page ?? 1;
+  url.searchParams.set("limit", String(NOTES_PAGE_SIZE));
+  url.searchParams.set("offset", String((page - 1) * NOTES_PAGE_SIZE));
 
   let response: Response;
   try {

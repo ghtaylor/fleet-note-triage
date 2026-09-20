@@ -5,7 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type ReactNode, useTransition } from "react";
 
-import type { NoteQuery } from "@/data/note-query";
+import {
+  createNoteSearchParams,
+  noteQueryHref,
+  type NoteQuery,
+} from "@/data/note-query";
 
 type QueryParameter = "category" | "priority" | "sort_by" | "direction";
 
@@ -40,7 +44,7 @@ function SelectField({
       <span className="sr-only">{label}</span>
       <select
         name={name}
-        defaultValue={value}
+        value={value}
         disabled={disabled}
         onChange={(event) => onValueChange(name, event.target.value)}
         className={selectClassName}
@@ -51,27 +55,8 @@ function SelectField({
   );
 }
 
-function createSearchParams(query: NoteQuery) {
-  const searchParams = new URLSearchParams();
-  if (query.category) searchParams.set("category", query.category);
-  if (query.priority) searchParams.set("priority", query.priority);
-  if (query.status) searchParams.set("status", query.status);
-  if (query.sortBy !== "priority") {
-    searchParams.set("sort_by", query.sortBy);
-  }
-  if (query.direction && query.direction !== "desc") {
-    searchParams.set("direction", query.direction);
-  }
-  return searchParams;
-}
-
 function isDefaultValue(name: QueryParameter, value: string) {
   return (name === "sort_by" && value === "priority") || (name === "direction" && value === "desc");
-}
-
-function queryHref(query: NoteQuery) {
-  const queryString = createSearchParams(query).toString();
-  return queryString ? `/?${queryString}` : "/";
 }
 
 export function NoteStatusTabs({ query }: { query: NoteQuery }) {
@@ -82,7 +67,7 @@ export function NoteStatusTabs({ query }: { query: NoteQuery }) {
         return (
           <Link
             key={tab.label}
-            href={queryHref({ ...query, status: tab.value })}
+            href={noteQueryHref({ ...query, status: tab.value, page: 1 })}
             scroll={false}
             aria-current={isActive ? "page" : undefined}
             className={clsx(
@@ -105,7 +90,7 @@ export function NoteControls({ query }: { query: NoteQuery }) {
   const [isPending, startTransition] = useTransition();
 
   function updateQuery(name: QueryParameter, value: string) {
-    const searchParams = createSearchParams(query);
+    const searchParams = createNoteSearchParams({ ...query, page: 1 });
     if (!value || isDefaultValue(name, value)) {
       searchParams.delete(name);
     } else {
@@ -120,9 +105,8 @@ export function NoteControls({ query }: { query: NoteQuery }) {
 
   return (
     <section aria-label="Filter and sort notes" aria-busy={isPending}>
-      <div className="grid gap-2 border-y border-gray-200 bg-gray-50 px-4 py-3 sm:grid-cols-2 sm:px-5 xl:grid-cols-4">
+      <div className="grid gap-2 border-y border-gray-200 bg-gray-50 px-4 py-3 sm:grid-cols-2 sm:px-5 xl:grid-cols-[repeat(4,minmax(0,1fr))_auto]">
         <SelectField
-          key={`category:${query.category ?? "all"}`}
           label="Category"
           name="category"
           value={query.category ?? ""}
@@ -137,7 +121,6 @@ export function NoteControls({ query }: { query: NoteQuery }) {
           <option value="other">Other</option>
         </SelectField>
         <SelectField
-          key={`priority:${query.priority ?? "all"}`}
           label="Priority"
           name="priority"
           value={query.priority ?? ""}
@@ -151,7 +134,6 @@ export function NoteControls({ query }: { query: NoteQuery }) {
           <option value="low">Low</option>
         </SelectField>
         <SelectField
-          key={`sort:${query.sortBy}`}
           label="Sort by"
           name="sort_by"
           value={query.sortBy}
@@ -162,7 +144,6 @@ export function NoteControls({ query }: { query: NoteQuery }) {
           <option value="created_at">Sort: Created</option>
         </SelectField>
         <SelectField
-          key={`direction:${query.direction ?? "desc"}`}
           label="Direction"
           name="direction"
           value={query.direction ?? "desc"}
@@ -172,26 +153,20 @@ export function NoteControls({ query }: { query: NoteQuery }) {
           <option value="desc">Direction: Descending</option>
           <option value="asc">Direction: Ascending</option>
         </SelectField>
-      </div>
-      <div className="flex min-h-7 items-center justify-between px-4 sm:px-5">
-        <p
-          role="status"
-          aria-live="polite"
-          className={clsx(
-            "text-xs text-gray-500 transition-opacity duration-150",
-            isPending ? "opacity-100 delay-200" : "opacity-0 delay-0",
-          )}
-        >
-          {isPending ? "Updating notes…" : ""}
-        </p>
         <Link
           href="/"
           scroll={false}
-          className="rounded px-2 py-1 text-xs font-medium text-gray-500 hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-orange-500"
+          className="flex min-h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-600 hover:border-gray-300 hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500 sm:col-span-2 xl:col-span-1"
         >
+          <svg aria-hidden="true" viewBox="0 0 16 16" className="size-3.5" fill="none">
+            <path d="M4 4l8 8m0-8-8 8" stroke="currentColor" strokeLinecap="round" strokeWidth="1.5" />
+          </svg>
           Clear filters
         </Link>
       </div>
+      <p role="status" aria-live="polite" className="sr-only">
+        {isPending ? "Updating notes…" : ""}
+      </p>
     </section>
   );
 }

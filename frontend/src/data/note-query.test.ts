@@ -11,6 +11,7 @@ describe("parseNoteQuery", () => {
         status: "open",
         sort_by: "created_at",
         direction: "asc",
+        page: "3",
       }),
     ).toEqual({
       category: "mechanical",
@@ -18,6 +19,7 @@ describe("parseNoteQuery", () => {
       status: "open",
       sortBy: "created_at",
       direction: "asc",
+      page: 3,
     });
   });
 
@@ -36,6 +38,13 @@ describe("parseNoteQuery", () => {
       status: undefined,
       sortBy: "priority",
       direction: "desc",
+      page: 1,
     });
+  });
+
+  it("defaults invalid page values to the first page", () => {
+    expect(parseNoteQuery({ page: "0" }).page).toBe(1);
+    expect(parseNoteQuery({ page: "2.5" }).page).toBe(1);
+    expect(parseNoteQuery({ page: ["1", "2"] }).page).toBe(1);
   });
 });

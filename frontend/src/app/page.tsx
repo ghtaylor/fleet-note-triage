@@ -3,8 +3,8 @@ import { changeNoteStatus, submitNote } from "@/app/actions";
 import { NoteComposer } from "@/components/note-composer";
 import { NoteControls, NoteStatusTabs } from "@/components/note-controls";
 import { NoteList } from "@/components/note-list";
-import { parseNoteQuery, type NoteQuery } from "@/data/note-query";
-import { fetchNotes } from "@/data/notes";
+import { noteQueryHref, parseNoteQuery, type NoteQuery } from "@/data/note-query";
+import { fetchNotes, NOTES_PAGE_SIZE } from "@/data/notes";
 
 async function loadNotes(
   backendUrl: string,
@@ -26,6 +26,16 @@ export default async function Home({ searchParams }: PageProps<"/">) {
     <NoteList
       availability="available"
       total={notes.total}
+      pagination={{
+        page: query.page,
+        pageSize: NOTES_PAGE_SIZE,
+        previousHref:
+          query.page > 1 ? noteQueryHref({ ...query, page: query.page - 1 }) : undefined,
+        nextHref:
+          query.page * NOTES_PAGE_SIZE < notes.total
+            ? noteQueryHref({ ...query, page: query.page + 1 })
+            : undefined,
+      }}
       items={notes.items.map((note) => ({
         id: note.id,
         title: note.title,
