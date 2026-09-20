@@ -22,5 +22,9 @@ async function isBackendHealthy(): Promise<boolean> {
 export default async function Home() {
   const isHealthy = await isBackendHealthy();
 
-  return <span>Backend is {isHealthy ? "healthy" : "not healthy"}</span>;
+  return (
+    <span className="text-lg font-semibold">
+      Backend is {isHealthy ? "healthy" : "not healthy"}
+    </span>
+  );
 }
