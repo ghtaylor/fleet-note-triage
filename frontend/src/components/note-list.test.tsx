@@ -1,28 +1,29 @@
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import type { NoteListResponse } from "@/api/types.gen";
-import { NoteList } from "@/components/note-list";
+import { NoteList, type NoteListProps } from "@/components/note-list";
 
-const notes: NoteListResponse = {
+const notes = {
+  availability: "available",
   items: [
     {
       id: "1d9f15de-fc3b-4ead-b076-bcaa83fbc630",
-      source_text: "Brake pads worn on car 12.",
-      title: "Worn brake pads",
-      category: "mechanical",
-      priority: "high",
-      status: "open",
-      created_at: "2026-09-20T12:00:00Z",
-      resolved_at: null,
+      note: {
+        sourceText: "Brake pads worn on car 12.",
+        title: "Worn brake pads",
+        category: "mechanical",
+        priority: "high",
+        status: "open",
+        createdAt: "2026-09-20T12:00:00Z",
+      },
     },
   ],
   total: 1,
-};
+} satisfies NoteListProps;
 
 describe("NoteList", () => {
   it("shows an alert when notes are unavailable", () => {
-    render(<NoteList notes={null} />);
+    render(<NoteList availability="unavailable" />);
 
     expect(screen.getByRole("alert")).toHaveTextContent(
       "Notes are unavailable. Try again shortly.",
@@ -30,13 +31,13 @@ describe("NoteList", () => {
   });
 
   it("shows an empty state when there are no notes", () => {
-    render(<NoteList notes={{ items: [], total: 0 }} />);
+    render(<NoteList availability="available" items={[]} total={0} />);
 
     expect(screen.getByText("No fleet notes have been submitted.")).toBeInTheDocument();
   });
 
   it("shows the note count and note details", () => {
-    render(<NoteList notes={notes} />);
+    render(<NoteList availability="available" items={notes.items} total={notes.total} />);
 
     expect(screen.getByRole("heading", { level: 2, name: "1 note" })).toBeInTheDocument();
 
