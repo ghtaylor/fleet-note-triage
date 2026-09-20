@@ -1,13 +1,20 @@
-.PHONY: install dev dev-backend dev-frontend test lint typecheck
+.PHONY: install migrate seed dev dev-backend dev-frontend test lint typecheck
 
 install:
 	cd backend && uv sync
 	cd frontend && npm ci
+	$(MAKE) migrate
+
+migrate:
+	cd backend && uv run alembic upgrade head
+
+seed: migrate
+	cd backend && uv run python -m app.seed
 
 dev:
 	$(MAKE) -j2 dev-backend dev-frontend
 
-dev-backend:
+dev-backend: migrate
 	cd backend && uv run uvicorn app.main:app --reload
 
 dev-frontend:
