@@ -33,6 +33,15 @@ class NotePriority(StrEnum):
     HIGH = "high"
     CRITICAL = "critical"
 
+    @property
+    def rank(self) -> int:
+        return {
+            NotePriority.LOW: 1,
+            NotePriority.MEDIUM: 2,
+            NotePriority.HIGH: 3,
+            NotePriority.CRITICAL: 4,
+        }[self]
+
 
 class NoteStatus(StrEnum):
     OPEN = "open"
