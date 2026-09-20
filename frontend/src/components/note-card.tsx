@@ -1,6 +1,9 @@
+import type { NoteStatusAction } from "@/actions/note-status";
 import type { NoteCategory, NotePriority, NoteStatus } from "@/api/types.gen";
+import { NoteStatusControl } from "@/components/note-status-control";
 
 export type NoteCardNote = {
+  id: string;
   title: string;
   status: NoteStatus;
   sourceText: string;
@@ -14,7 +17,13 @@ const createdAtFormatter = new Intl.DateTimeFormat("en-GB", {
   timeStyle: "short",
 });
 
-export function NoteCard({ note }: { note: NoteCardNote }) {
+export function NoteCard({
+  note,
+  changeStatusAction,
+}: {
+  note: NoteCardNote;
+  changeStatusAction: NoteStatusAction;
+}) {
   return (
     <article className="rounded border border-gray-300 p-4">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -40,6 +49,12 @@ export function NoteCard({ note }: { note: NoteCardNote }) {
           </dd>
         </div>
       </dl>
+      <div className="mt-4">
+        <NoteStatusControl
+          note={{ id: note.id, status: note.status }}
+          changeStatusAction={changeStatusAction}
+        />
+      </div>
     </article>
   );
 }

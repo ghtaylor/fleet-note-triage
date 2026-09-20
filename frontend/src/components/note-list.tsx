@@ -1,10 +1,14 @@
+import type { NoteStatusAction } from "@/actions/note-status";
 import { NoteCard, type NoteCardNote } from "@/components/note-card";
-
-export type NoteListItem = { id: string; note: NoteCardNote };
 
 export type NoteListProps =
   | { availability: "unavailable" }
-  | { availability: "available"; items: readonly NoteListItem[]; total: number };
+  | {
+      availability: "available";
+      items: readonly NoteCardNote[];
+      total: number;
+      changeStatusAction: NoteStatusAction;
+    };
 
 export function NoteList(props: NoteListProps) {
   if (props.availability === "unavailable") {
@@ -25,9 +29,9 @@ export function NoteList(props: NoteListProps) {
         {props.total} {props.total === 1 ? "note" : "notes"}
       </h2>
       <ul className="space-y-3">
-        {props.items.map(({ id, note }) => (
-          <li key={id}>
-            <NoteCard note={note} />
+        {props.items.map((note) => (
+          <li key={note.id}>
+            <NoteCard note={note} changeStatusAction={props.changeStatusAction} />
           </li>
         ))}
       </ul>

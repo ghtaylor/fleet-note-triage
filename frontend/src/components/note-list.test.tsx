@@ -1,24 +1,29 @@
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import type { NoteStatusAction } from "@/actions/note-status";
 import { NoteList, type NoteListProps } from "@/components/note-list";
+
+const changeStatusAction: NoteStatusAction = async () => ({
+  status: "success",
+  message: "Note resolved.",
+});
 
 const notes = {
   availability: "available",
   items: [
     {
       id: "1d9f15de-fc3b-4ead-b076-bcaa83fbc630",
-      note: {
-        sourceText: "Brake pads worn on car 12.",
-        title: "Worn brake pads",
-        category: "mechanical",
-        priority: "high",
-        status: "open",
-        createdAt: "2026-09-20T12:00:00Z",
-      },
+      sourceText: "Brake pads worn on car 12.",
+      title: "Worn brake pads",
+      category: "mechanical",
+      priority: "high",
+      status: "open",
+      createdAt: "2026-09-20T12:00:00Z",
     },
   ],
   total: 1,
+  changeStatusAction,
 } satisfies NoteListProps;
 
 describe("NoteList", () => {
@@ -31,13 +36,27 @@ describe("NoteList", () => {
   });
 
   it("shows an empty state when there are no notes", () => {
-    render(<NoteList availability="available" items={[]} total={0} />);
+    render(
+      <NoteList
+        availability="available"
+        items={[]}
+        total={0}
+        changeStatusAction={changeStatusAction}
+      />,
+    );
 
     expect(screen.getByText("No fleet notes have been submitted.")).toBeInTheDocument();
   });
 
   it("shows the note count and note details", () => {
-    render(<NoteList availability="available" items={notes.items} total={notes.total} />);
+    render(
+      <NoteList
+        availability="available"
+        items={notes.items}
+        total={notes.total}
+        changeStatusAction={notes.changeStatusAction}
+      />,
+    );
 
     expect(screen.getByRole("heading", { level: 2, name: "1 note" })).toBeInTheDocument();
 

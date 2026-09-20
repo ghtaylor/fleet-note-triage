@@ -1,11 +1,15 @@
-import { submitNote } from "@/app/actions";
+import type { NoteListResponse } from "@/api/types.gen";
+import { changeNoteStatus, submitNote } from "@/app/actions";
 import { NoteComposer } from "@/components/note-composer";
 import { NoteControls } from "@/components/note-controls";
 import { NoteList } from "@/components/note-list";
 import { parseNoteQuery, type NoteQuery } from "@/data/note-query";
 import { fetchNotes } from "@/data/notes";
 
-async function loadNotes(backendUrl: string, query: NoteQuery) {
+async function loadNotes(
+  backendUrl: string,
+  query: NoteQuery,
+): Promise<NoteListResponse | null> {
   try {
     return await fetchNotes(backendUrl, query);
   } catch (error) {
@@ -24,15 +28,14 @@ export default async function Home({ searchParams }: PageProps<"/">) {
       total={notes.total}
       items={notes.items.map((note) => ({
         id: note.id,
-        note: {
-          title: note.title,
-          status: note.status,
-          sourceText: note.source_text,
-          priority: note.priority,
-          category: note.category,
-          createdAt: note.created_at,
-        },
+        title: note.title,
+        status: note.status,
+        sourceText: note.source_text,
+        priority: note.priority,
+        category: note.category,
+        createdAt: note.created_at,
       }))}
+      changeStatusAction={changeNoteStatus}
     />
   ) : (
     <NoteList availability="unavailable" />
