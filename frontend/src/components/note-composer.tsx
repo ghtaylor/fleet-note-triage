@@ -43,7 +43,7 @@ export function NoteComposer({ submitAction }: { submitAction: NoteSubmissionAct
         <div className="mt-2 flex items-end justify-between gap-3">
           <div className="min-h-10 text-sm">
             <p id="source-text-hint" className="text-gray-500">
-              One issue per note. Press Ctrl or ⌘ + Enter to submit.
+              One issue per note. Press Enter to submit or Shift + Enter for a new line.
             </p>
             <p
               id="submission-message"

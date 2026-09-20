@@ -66,13 +66,13 @@ describe("NoteComposer", () => {
     });
   });
 
-  it("submits with Control+Enter", async () => {
+  it("submits with Enter", async () => {
     const action = actionReturning({ status: "success", message: "Note added." });
     render(<NoteComposer submitAction={action} />);
 
     const sourceText = screen.getByRole("textbox", { name: "Fleet note" });
     fireEvent.change(sourceText, { target: { value: "Telemetry keeps restarting." } });
-    fireEvent.keyDown(sourceText, { key: "Enter", ctrlKey: true });
+    fireEvent.keyDown(sourceText, { key: "Enter" });
 
     await waitFor(() => expect(action).toHaveBeenCalledOnce());
   });

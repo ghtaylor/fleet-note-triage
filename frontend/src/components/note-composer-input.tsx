@@ -16,10 +16,10 @@ export function NoteComposerInput({
   describedBy,
 }: NoteComposerInputProps) {
   function submitWithKeyboard(event: KeyboardEvent<HTMLTextAreaElement>) {
-    if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
-      event.preventDefault();
-      event.currentTarget.form?.requestSubmit();
-    }
+    if (event.key !== "Enter" || event.shiftKey) return;
+
+    event.preventDefault();
+    event.currentTarget.form?.requestSubmit();
   }
 
   return (
