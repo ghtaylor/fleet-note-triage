@@ -1,0 +1,30 @@
+# Environment
+.env
+.env.*
+!.env.example
+
+# Node.js
+node_modules/
+.next/
+out/
+build/
+coverage/
+.vitest/
+*.tsbuildinfo
+next-env.d.ts
+npm-debug.log*
+
+# Python
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.py[cod]
+*.db
+*.sqlite
+*.sqlite3
+
+# Editors and operating systems
+.DS_Store
+.idea/
+.vscode/
