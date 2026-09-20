@@ -1,0 +1,48 @@
+from typing import Any, ClassVar
+
+import pytest
+from fastapi import HTTPException
+
+from app import dependencies
+from app.adapters.extraction.openai_extractor import OpenAINoteExtractor
+
+
+class FakeOpenAIClient:
+    options: ClassVar[dict[str, Any]] = {}
+
+    def __init__(self, **options: Any) -> None:
+        type(self).options = options
+
+
+def test_note_extractor_uses_openai_settings(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("OPENAI_API_KEY", "test-api-key")
+    monkeypatch.setenv("OPENAI_MODEL", "test-model")
+    monkeypatch.setenv("OPENAI_TIMEOUT_SECONDS", "6.5")
+    monkeypatch.setattr(dependencies, "OpenAIClient", FakeOpenAIClient)
+    dependencies.get_note_extractor.cache_clear()
+
+    extractor = dependencies.get_note_extractor()
+
+    assert isinstance(extractor, OpenAINoteExtractor)
+    assert FakeOpenAIClient.options == {
+        "api_key": "test-api-key",
+        "timeout": 6.5,
+        "max_retries": 1,
+    }
+    dependencies.get_note_extractor.cache_clear()
+
+
+def test_note_extractor_is_unavailable_without_api_key(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("OPENAI_API_KEY", "")
+    dependencies.get_note_extractor.cache_clear()
+
+    with pytest.raises(HTTPException) as caught:
+        dependencies.get_note_extractor()
+
+    assert caught.value.status_code == 503
+    assert caught.value.detail == "extraction_unavailable"
+    dependencies.get_note_extractor.cache_clear()

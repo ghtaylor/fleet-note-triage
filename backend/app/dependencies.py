@@ -1,12 +1,15 @@
 from collections.abc import Iterator
 from datetime import UTC, datetime
+from functools import cache
 from typing import Annotated
 from uuid import UUID, uuid4
 
 from fastapi import Depends, HTTPException
+from openai import OpenAI as OpenAIClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from app.adapters.extraction.openai_extractor import OpenAINoteExtractor
 from app.adapters.persistence.repository import SqlAlchemyNoteRepository
 from app.config import Settings
 from app.ports import NoteExtractor, NoteRepository
@@ -26,8 +29,18 @@ NoteRepositoryDependency = Annotated[
 ]
 
 
+@cache
 def get_note_extractor() -> NoteExtractor:
-    raise HTTPException(status_code=503, detail="extraction_unavailable")
+    settings = Settings()
+    if settings.openai_api_key is None:
+        raise HTTPException(status_code=503, detail="extraction_unavailable")
+
+    client = OpenAIClient(
+        api_key=settings.openai_api_key.get_secret_value(),
+        timeout=settings.openai_timeout_seconds,
+        max_retries=1,
+    )
+    return OpenAINoteExtractor(client, model=settings.openai_model)
 
 
 NoteExtractorDependency = Annotated[NoteExtractor, Depends(get_note_extractor)]
