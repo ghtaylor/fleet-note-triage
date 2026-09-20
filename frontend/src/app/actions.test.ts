@@ -25,7 +25,7 @@ function submissionData(sourceText: string) {
 
 describe("submitNote", () => {
   beforeEach(() => {
-    vi.stubEnv("BACKEND_URL", "http://localhost:8000");
+    vi.stubEnv("BACKEND_URL", "https://api.example.test");
   });
 
   afterEach(() => {

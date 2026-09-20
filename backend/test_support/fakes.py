@@ -20,7 +20,6 @@ class FakeNoteExtractor:
 class FakeNoteRepository:
     def __init__(self, *notes: Note) -> None:
         self.notes = list(notes)
-        self.queries: list[NoteQuery] = []
         self.updated_notes: list[Note] = []
 
     def add(self, note: Note) -> None:
@@ -30,7 +29,6 @@ class FakeNoteRepository:
         return next((note for note in self.notes if note.id == note_id), None)
 
     def list_notes(self, query: NoteQuery) -> NotePage:
-        self.queries.append(query)
         notes = [
             note
             for note in self.notes

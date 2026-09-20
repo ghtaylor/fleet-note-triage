@@ -29,39 +29,31 @@ def test_unexpected_error_returns_safe_error_code(client: TestClient) -> None:
     assert response.json() == {"detail": "internal_server_error"}
 
 
-def test_openapi_documents_unexpected_server_errors() -> None:
-    schema = app.openapi()
+def test_openapi_documents_error_responses() -> None:
+    paths = app.openapi()["paths"]
+    error_schema = {"$ref": "#/components/schemas/ErrorResponse"}
 
-    assert schema["paths"]["/notes"]["get"]["responses"]["500"]["content"][
-        "application/json"
-    ]["schema"] == {"$ref": "#/components/schemas/ErrorResponse"}
-
-
-def test_openapi_documents_extraction_unavailable_errors() -> None:
-    schema = app.openapi()
-
-    assert schema["paths"]["/notes"]["post"]["responses"]["503"]["content"][
-        "application/json"
-    ]["schema"] == {"$ref": "#/components/schemas/ErrorResponse"}
-
-
-def test_openapi_documents_both_unprocessable_content_errors() -> None:
-    schema = app.openapi()
-
-    response_schema = schema["paths"]["/notes"]["post"]["responses"]["422"][
-        "content"
-    ]["application/json"]["schema"]
-    assert response_schema["anyOf"] == [
-        {"$ref": "#/components/schemas/ErrorResponse"},
+    assert (
+        paths["/notes"]["get"]["responses"]["500"]["content"]["application/json"][
+            "schema"
+        ]
+        == error_schema
+    )
+    assert (
+        paths["/notes"]["post"]["responses"]["503"]["content"]["application/json"][
+            "schema"
+        ]
+        == error_schema
+    )
+    assert (
+        paths["/notes/{note_id}"]["patch"]["responses"]["404"]["content"][
+            "application/json"
+        ]["schema"]
+        == error_schema
+    )
+    assert paths["/notes"]["post"]["responses"]["422"]["content"]["application/json"][
+        "schema"
+    ]["anyOf"] == [
+        error_schema,
         {"$ref": "#/components/schemas/RequestValidationErrorResponse"},
     ]
-
-
-def test_openapi_documents_note_not_found_errors() -> None:
-    schema = app.openapi()
-
-    assert schema["paths"]["/notes/{note_id}"]["patch"]["responses"]["404"][
-        "content"
-    ]["application/json"]["schema"] == {
-        "$ref": "#/components/schemas/ErrorResponse"
-    }

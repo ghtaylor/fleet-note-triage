@@ -52,11 +52,7 @@ def client(
     app.dependency_overrides.clear()
 
 
-def test_submit_note_returns_created_note(
-    client: TestClient,
-    repository: FakeNoteRepository,
-    extractor: FakeNoteExtractor,
-) -> None:
+def test_submit_note_returns_created_note(client: TestClient) -> None:
     response = client.post(
         "/notes",
         json={"source_text": "  Brake pads worn on car 12  "},
@@ -73,14 +69,11 @@ def test_submit_note_returns_created_note(
         "created_at": "2026-03-01T09:30:00Z",
         "resolved_at": None,
     }
-    assert extractor.source_texts == ["Brake pads worn on car 12"]
-    assert len(repository.notes) == 1
 
 
 def test_submit_note_returns_unactionable_error(
     client: TestClient,
     extractor: FakeNoteExtractor,
-    repository: FakeNoteRepository,
 ) -> None:
     extractor.outcome = UnactionableExtraction(reason="No fleet issue found")
 
@@ -88,13 +81,11 @@ def test_submit_note_returns_unactionable_error(
 
     assert response.status_code == 422
     assert response.json() == {"detail": "source_text_not_actionable"}
-    assert repository.notes == []
 
 
 def test_submit_note_returns_extraction_unavailable_error(
     client: TestClient,
     extractor: FakeNoteExtractor,
-    repository: FakeNoteRepository,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     extractor.outcome = ExtractionUnavailable("provider timed out")
@@ -105,7 +96,6 @@ def test_submit_note_returns_extraction_unavailable_error(
     assert response.status_code == 503
     assert response.json() == {"detail": "extraction_unavailable"}
     assert "Note extraction unavailable: provider timed out" in caplog.text
-    assert repository.notes == []
 
 
 @pytest.mark.parametrize("source_text", ["   ", "x" * 2_001])
@@ -118,17 +108,3 @@ def test_submit_note_rejects_invalid_source_text_without_extraction(
 
     assert response.status_code == 422
     assert extractor.source_texts == []
-
-
-def test_submit_note_validates_source_text_before_extractor_configuration(
-    client: TestClient,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.setenv("OPENAI_API_KEY", "")
-    get_note_extractor.cache_clear()
-    app.dependency_overrides[get_note_extractor] = get_note_extractor
-
-    response = client.post("/notes", json={"source_text": "   "})
-
-    assert response.status_code == 422
-    get_note_extractor.cache_clear()

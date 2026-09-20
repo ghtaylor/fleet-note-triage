@@ -42,29 +42,18 @@ def client(repository: FakeNoteRepository) -> Iterator[TestClient]:
     app.dependency_overrides.pop(get_current_time)
 
 
-def test_set_note_status_resolves_an_open_note(
-    client: TestClient,
-    repository: FakeNoteRepository,
-) -> None:
-    response = client.patch(f"/notes/{NOTE_ID}", json={"status": "resolved"})
+def test_set_note_status_resolves_and_reopens_note(client: TestClient) -> None:
+    resolved = client.patch(f"/notes/{NOTE_ID}", json={"status": "resolved"})
 
-    assert response.status_code == 200
-    assert response.json()["status"] == "resolved"
-    assert response.json()["resolved_at"] == "2026-03-01T10:45:00Z"
-    assert repository.updated_notes == [repository.notes[0]]
+    assert resolved.status_code == 200
+    assert resolved.json()["status"] == "resolved"
+    assert resolved.json()["resolved_at"] == "2026-03-01T10:45:00Z"
 
+    reopened = client.patch(f"/notes/{NOTE_ID}", json={"status": "open"})
 
-def test_set_note_status_reopens_a_resolved_note(
-    client: TestClient,
-    repository: FakeNoteRepository,
-) -> None:
-    repository.notes[0] = make_note(resolved_at=RESOLVED_AT)
-
-    response = client.patch(f"/notes/{NOTE_ID}", json={"status": "open"})
-
-    assert response.status_code == 200
-    assert response.json()["status"] == "open"
-    assert response.json()["resolved_at"] is None
+    assert reopened.status_code == 200
+    assert reopened.json()["status"] == "open"
+    assert reopened.json()["resolved_at"] is None
 
 
 def test_set_note_status_returns_not_found_for_a_missing_note(

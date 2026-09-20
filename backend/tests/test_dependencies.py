@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 from typing import Any, ClassVar
 
 import pytest
@@ -38,8 +39,10 @@ def test_note_extractor_uses_openai_settings(
 def test_note_extractor_is_unavailable_without_api_key(
     monkeypatch: pytest.MonkeyPatch,
     caplog: pytest.LogCaptureFixture,
+    tmp_path: Path,
 ) -> None:
-    monkeypatch.setenv("OPENAI_API_KEY", "")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     dependencies.get_note_extractor.cache_clear()
 
     with caplog.at_level(logging.WARNING, logger="app.dependencies"):

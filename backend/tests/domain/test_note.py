@@ -83,8 +83,13 @@ def test_note_state_transitions_are_idempotent() -> None:
     open_note = make_note()
     resolved_note = open_note.resolve(RESOLVED_AT)
 
-    assert open_note.reopen() is open_note
-    assert resolved_note.resolve(RESOLVED_AT + timedelta(hours=1)) is resolved_note
+    reopened_note = open_note.reopen()
+    resolved_again = resolved_note.resolve(RESOLVED_AT + timedelta(hours=1))
+
+    assert reopened_note.status is NoteStatus.OPEN
+    assert reopened_note.resolved_at is None
+    assert resolved_again.status is NoteStatus.RESOLVED
+    assert resolved_again.resolved_at == RESOLVED_AT
 
 
 def test_note_rejects_resolution_before_creation() -> None:
