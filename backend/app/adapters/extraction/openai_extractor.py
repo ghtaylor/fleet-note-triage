@@ -2,10 +2,14 @@ from typing import Any, Protocol
 
 from openai import OpenAI as OpenAIClient
 from openai import OpenAIError
-from pydantic import RootModel
+from pydantic import BaseModel
 
 from app.application.errors import ExtractionUnavailable
-from app.domain.extraction import ExtractionResult
+from app.domain.extraction import (
+    ExtractedNoteData,
+    ExtractionResult,
+    UnactionableExtraction,
+)
 
 _INSTRUCTIONS = """Extract one actionable fleet issue from the technician note.
 For vague but potentially meaningful fleet issues, return an actionable result.
@@ -14,8 +18,8 @@ Follow the structured output schema and do not add facts that are not in the not
 """
 
 
-class ExtractionResponse(RootModel[ExtractionResult]):
-    pass
+class ExtractionResponse(BaseModel):
+    result: ExtractedNoteData | UnactionableExtraction
 
 
 class _OpenAIClient(Protocol):
@@ -43,4 +47,4 @@ class OpenAINoteExtractor:
         parsed = response.output_parsed
         if not isinstance(parsed, ExtractionResponse):
             raise ExtractionUnavailable("OpenAI returned no structured output")
-        return parsed.root
+        return parsed.result

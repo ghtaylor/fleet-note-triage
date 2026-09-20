@@ -44,7 +44,7 @@ class FakeOpenAIClient:
 def parsed_response(result: ExtractionResult) -> FakeParsedResponse:
     from app.adapters.extraction.openai_extractor import ExtractionResponse
 
-    return FakeParsedResponse(output_parsed=ExtractionResponse(root=result))
+    return FakeParsedResponse(output_parsed=ExtractionResponse(result=result))
 
 
 def test_extract_returns_actionable_data() -> None:
@@ -86,6 +86,9 @@ def test_extract_requests_structured_output() -> None:
         "content": "Thanks for your help",
     }
     assert request["text_format"].__name__ == "ExtractionResponse"
+    schema = request["text_format"].model_json_schema()
+    assert schema["type"] == "object"
+    assert "oneOf" not in schema
 
 
 def test_extract_translates_provider_failure() -> None:
