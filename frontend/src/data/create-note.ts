@@ -1,4 +1,4 @@
-import type { NoteResponse } from "@/api/types.gen";
+import type { NoteResponse, SubmitNoteRequest } from "@/api/types.gen";
 import { zErrorResponse, zNoteResponse } from "@/api/zod.gen";
 
 const CREATE_NOTE_TIMEOUT_MS = 10_000;
@@ -17,7 +17,7 @@ export class CreateNoteError extends Error {
 
 export async function createNote(
   backendUrl: string,
-  sourceText: string,
+  body: SubmitNoteRequest,
   request: typeof fetch = fetch,
 ): Promise<NoteResponse> {
   let response: Response;
@@ -25,7 +25,7 @@ export async function createNote(
     response = await request(new URL("/notes", backendUrl), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ source_text: sourceText }),
+      body: JSON.stringify(body),
       signal: AbortSignal.timeout(CREATE_NOTE_TIMEOUT_MS),
     });
   } catch (error) {

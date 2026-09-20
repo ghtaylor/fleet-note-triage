@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import { useActionState, useState } from "react";
 
 import {
@@ -48,7 +49,7 @@ export function NoteComposer({ submitAction }: { submitAction: NoteSubmissionAct
               id="submission-message"
               role={hasError ? "alert" : "status"}
               aria-live="polite"
-              className={hasError ? "mt-1 text-red-700" : "mt-1 text-green-700"}
+              className={clsx("mt-1", hasError ? "text-red-700" : "text-green-700")}
             >
               {state.message}
             </p>

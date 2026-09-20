@@ -13,17 +13,21 @@ const createdNote = {
   resolved_at: null,
 };
 
+function noteRequest(sourceText: string) {
+  return { source_text: sourceText };
+}
+
 describe("createNote", () => {
   it("submits source text and returns the validated note", async () => {
     const request = async (_input: RequestInfo | URL, init?: RequestInit) => {
       expect(init?.method).toBe("POST");
       expect(init?.headers).toEqual({ "Content-Type": "application/json" });
-      expect(init?.body).toBe(JSON.stringify({ source_text: createdNote.source_text }));
+      expect(init?.body).toBe(JSON.stringify(noteRequest(createdNote.source_text)));
       return Response.json(createdNote, { status: 201 });
     };
 
     await expect(
-      createNote("http://localhost:8000", createdNote.source_text, request),
+      createNote("http://localhost:8000", noteRequest(createdNote.source_text), request),
     ).resolves.toEqual(createdNote);
   });
 
@@ -31,7 +35,9 @@ describe("createNote", () => {
     const request = async () =>
       Response.json({ detail: "source_text_not_actionable" }, { status: 422 });
 
-    await expect(createNote("http://localhost:8000", "unclear", request)).rejects.toMatchObject({
+    await expect(
+      createNote("http://localhost:8000", noteRequest("unclear"), request),
+    ).rejects.toMatchObject({
       code: "source_text_not_actionable",
     } satisfies Partial<CreateNoteError>);
   });
@@ -40,7 +46,9 @@ describe("createNote", () => {
     const request = async () =>
       Response.json({ detail: "extraction_unavailable" }, { status: 503 });
 
-    await expect(createNote("http://localhost:8000", "Brake issue", request)).rejects.toMatchObject({
+    await expect(
+      createNote("http://localhost:8000", noteRequest("Brake issue"), request),
+    ).rejects.toMatchObject({
       code: "extraction_unavailable",
     } satisfies Partial<CreateNoteError>);
   });
@@ -48,8 +56,8 @@ describe("createNote", () => {
   it("rejects a successful response that does not match the contract", async () => {
     const request = async () => Response.json({ title: "Incomplete" }, { status: 201 });
 
-    await expect(createNote("http://localhost:8000", "Brake issue", request)).rejects.toThrow(
-      "Create note response did not match the API contract",
-    );
+    await expect(
+      createNote("http://localhost:8000", noteRequest("Brake issue"), request),
+    ).rejects.toThrow("Create note response did not match the API contract");
   });
 });

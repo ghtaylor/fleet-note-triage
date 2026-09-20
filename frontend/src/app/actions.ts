@@ -31,7 +31,7 @@ export async function submitNote(
   }
 
   try {
-    await createNote(backendUrl, request.data.source_text);
+    await createNote(backendUrl, request.data);
   } catch (error) {
     if (error instanceof CreateNoteError) {
       if (error.code === "source_text_not_actionable") {
