@@ -19,14 +19,16 @@ from app.dependencies import (
 from app.domain.note import NoteCategory, NotePriority, NoteStatus
 from app.ports import NoteQuery, NoteSortField, SortDirection
 from app.schemas import (
+    ErrorResponse,
     HealthResponse,
     NoteListResponse,
     NoteResponse,
+    RequestValidationErrorResponse,
     SetNoteStatusRequest,
     SubmitNoteRequest,
 )
 
-router = APIRouter()
+router = APIRouter(responses={500: {"model": ErrorResponse}})
 
 
 @router.get("/health", response_model=HealthResponse)
@@ -34,7 +36,15 @@ def get_health() -> HealthResponse:
     return HealthResponse(status="ok")
 
 
-@router.post("/notes", response_model=NoteResponse, status_code=201)
+@router.post(
+    "/notes",
+    response_model=NoteResponse,
+    status_code=201,
+    responses={
+        422: {"model": ErrorResponse | RequestValidationErrorResponse},
+        503: {"model": ErrorResponse},
+    },
+)
 def post_note(
     request: SubmitNoteRequest,
     extractor: NoteExtractorDependency,
@@ -60,7 +70,11 @@ def post_note(
     return NoteResponse.model_validate(note)
 
 
-@router.patch("/notes/{note_id}", response_model=NoteResponse)
+@router.patch(
+    "/notes/{note_id}",
+    response_model=NoteResponse,
+    responses={404: {"model": ErrorResponse}},
+)
 def patch_note(
     note_id: UUID,
     request: SetNoteStatusRequest,

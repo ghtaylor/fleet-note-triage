@@ -16,6 +16,27 @@ class HealthResponse(BaseModel):
     status: Literal["ok"]
 
 
+class ErrorResponse(BaseModel):
+    detail: Literal[
+        "extraction_unavailable",
+        "internal_server_error",
+        "note_not_found",
+        "source_text_not_actionable",
+    ]
+
+
+class ValidationErrorDetail(BaseModel):
+    loc: list[str | int]
+    msg: str
+    type: str
+    input: object | None = None
+    ctx: dict[str, object] | None = None
+
+
+class RequestValidationErrorResponse(BaseModel):
+    detail: list[ValidationErrorDetail]
+
+
 class NoteResponse(BaseModel):
     id: UUID
     source_text: str
