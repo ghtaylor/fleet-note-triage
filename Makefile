@@ -1,4 +1,11 @@
-.PHONY: install migrate seed dev dev-backend dev-frontend test lint typecheck
+.PHONY: setup env install migrate seed dev dev-backend dev-frontend test lint typecheck
+
+setup: env install
+	cd backend && uv run python -m app.seed
+
+env:
+	if [ ! -f backend/.env ]; then cp backend/.env.example backend/.env; fi
+	if [ ! -f frontend/.env.local ]; then cp frontend/.env.example frontend/.env.local; fi
 
 install:
 	cd backend && uv sync
