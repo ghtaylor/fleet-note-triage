@@ -2,6 +2,10 @@
 
 This Fleet Note Triage app turns free-text vehicle issue reports into prioritised, filterable notes for an operations team.
 
+## Demo
+
+https://github.com/user-attachments/assets/0e2bf997-1c24-49c1-9d66-dc46f8e0f1f5
+
 ## Getting started
 
 ### Prerequisites
