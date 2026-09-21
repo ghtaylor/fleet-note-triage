@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import type { NoteListResponse } from "@/api/types.gen";
 import { changeNoteStatus, submitNote } from "@/app/actions";
 import { NoteComposer } from "@/components/note-composer";
@@ -55,7 +57,9 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   return (
     <>
       <header className="flex h-14 items-center border-b-2 border-orange-500 bg-gray-950 px-4 text-white sm:px-7">
-        <span className="text-sm font-bold tracking-tight">Fleet Note Triage</span>
+        <Link className="text-sm font-bold tracking-tight" href="/">
+          Fleet Note Triage
+        </Link>
       </header>
       <main className="mx-auto max-w-7xl px-3 pt-5 pb-[26rem] sm:px-6 lg:py-7">
         <header className="ui-enter mb-5">
