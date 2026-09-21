@@ -51,7 +51,7 @@ make typecheck  # Run Pyright
 
 ## How it works
 
-- The Next.js frontend submits rough technician notes to the FastAPI API.
+- The Next.js frontend submits technician notes to the FastAPI API.
 - OpenAI generates a short title and assigns a fixed category and priority. I used OpenAI's "Structured Outputs" feature, with descriptions on the Pydantic schema to guide the LLM.
 - The application saves actionable notes to SQLite along with their original text, status, and timestamps.
 - The dashboard lists urgent notes first and supports filtering, sorting, pagination, resolving, and reopening.
