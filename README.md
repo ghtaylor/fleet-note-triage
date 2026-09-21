@@ -79,3 +79,7 @@ make typecheck  # Run Pyright
 - When a submission fails (for example, because OpenAI is unavailable), prompt manual submission via a modal with pre-populated fields. This would ensure the app remains usable when the LLM is unavailable.
 - Add a small LLM evaluation suite covering representative, ambiguous, compound, irrelevant, and safety-critical notes. I would run this separately from the deterministic test suite because it would be slower, cost money, and could vary between runs.
 - Let users correct/edit the generated title, category, and priority. These corrections could be stored alongside the original result to expand the evaluation suite with real-world expected answers.
+
+## Development tools
+
+I used `pi` with `gpt-5.6-sol` as a coding assistant during development.
